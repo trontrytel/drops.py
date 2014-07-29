@@ -1,5 +1,6 @@
 load 'setup.gpi'
 
+#TODO: take outfreq into account!
 set yrange [0 : nt*dt]
 set ylabel "t [s]"
 set y2tics
