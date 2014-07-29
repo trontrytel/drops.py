@@ -24,6 +24,7 @@ prsr_lgr.add_argument('--RH',      type=float, required=True, help='initial rela
 prsr_lgr.add_argument('--w',       type=float, required=True, help='vertical velocity [m/s]')
 prsr_lgr.add_argument('--dt',      type=float, required=True, help='timestep [s]')
 prsr_lgr.add_argument('--nt',      type=int,   required=True, help='number of timesteps')
+prsr_lgr.add_argument('--outfreq', type=int,   required=True, help='output frequency (every outfreq timesteps)')
 prsr_lgr.add_argument('--kappa',   type=float, required=True, help='aerosol hygroscopicity parameter [1]')
 prsr_lgr.add_argument('--n_tot',   type=float, required=True, help='aerosol concentration @STP [m-3]')
 prsr_lgr.add_argument('--meanr',   type=float, required=True, help='aerosol mean dry radius [m]')
@@ -54,7 +55,7 @@ class lognormal:
 
 # performing the simulation
 rhs = rhs_lgrngn.rhs_lgrngn(args.outdir, args.dt, args.sd_conc, {args.kappa:lognormal(args.n_tot, args.meanr, args.gstdv)})
-parcel.parcel(p_d, th_d, r_v, args.w, args.nt, rhs)
+parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, rhs)
 
 # outputting a setup.gpi file
 out = open(args.outdir + '/setup.gpi', mode='w')

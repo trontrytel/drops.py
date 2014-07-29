@@ -3,7 +3,7 @@ from numpy import array as arr_t
 
 # p_d, th_d, r_v should contain initial values
 #                and are overwritten!
-def parcel(p_d, th_d, r_v, w, nt, rhs):
+def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
 
   # perfect gas for for dry air
   def rhod_fun(p_d, th_d):
@@ -16,8 +16,14 @@ def parcel(p_d, th_d, r_v, w, nt, rhs):
   rhs.init(rhod, th_d, r_v)
   rhs.diag(rhod, th_d, r_v, 0)
 
+  # placing a quick-look gnuplot file in the output directory
+  import os, shutil
+  shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', rhs.outdir + '/quicklook.gpi')
+
   # Euler-like integration
   for t in range(nt):
+    #TODO: update process name :)
+
     # first, adjusting thr pressure using hydrostatic law
     p_d += rhs.dt * (-g * rhod * w)
 
@@ -33,8 +39,5 @@ def parcel(p_d, th_d, r_v, w, nt, rhs):
     rhod = rhod_fun(p_d, th_d)
 
     # doing diagnostics / output
-    rhs.diag(rhod, th_d, r_v, t * rhs.dt)
- 
-  # placing a quick-look gnuplot file in the output directory
-  import os, shutil
-  shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', rhs.outdir + '/quicklook.gpi')
+    if (t % outfreq == 0):
+      rhs.diag(rhod, th_d, r_v, t * rhs.dt)

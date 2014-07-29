@@ -12,7 +12,7 @@ class rhs_lgrngn:
     opts_init.dry_distros = dry_distros
     opts_init.dt = dt
 
-    backend = lgrngn.backend_t.serial
+    backend = lgrngn.backend_t.serial #TODO: as an option
     self.prtcls = lgrngn.factory(backend, opts_init)
     self.opts = lgrngn.opts_t()
 
