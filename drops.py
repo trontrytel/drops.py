@@ -53,12 +53,12 @@ class lognormal:
       -pow((lnr - log(self.meanr)), 2) / 2 / pow(log(self.stdev),2)
     ) / log(self.stdev) / sqrt(2*pi);
 
+# outputting a setup.gpi file
+out = open(args.outdir + '/setup.gpi', mode='w')
+for key, val in vars(args).iteritems():
+  if key != "outdir":
+    out.write(u"%s = %g\n" % (key, float(val)))
+
 # performing the simulation
 rhs = rhs_lgrngn.rhs_lgrngn(args.outdir, args.dt, args.sd_conc, {args.kappa:lognormal(args.n_tot, args.meanr, args.gstdv)})
 parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, rhs)
-
-# outputting a setup.gpi file
-out = open(args.outdir + '/setup.gpi', mode='w')
-out.write(u"nt = %g\n" % (args.nt))
-out.write(u"dt = %g\n" % (args.dt))
-out.write(u"w  = %g\n" % (args.w))
