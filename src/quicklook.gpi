@@ -16,13 +16,13 @@ set multiplot layout 1,2
   set xlabel 'mixing ratio [g/kg]'
   set x2tics
   plot \
-    'sounding.txt' using (1e3*column(clmn_rv)):($0*dt) \
+    'sounding.txt' using (1e3*column(clmn_rv)):($0*outfreq*dt) \
       axes x1y1 \
       title 'water vapour mixing ratio [g/kg]' \
       with lines lw 2, \
-    'sounding.txt' using (column(clmn_m0)):($0*dt) \
+    'sounding.txt' using (1e-6*column(clmn_m0)):($0*outfreq*dt) \
       axes x2y1 \
-      title 'm0' \
+      title 'cloud droplet concentration [mg-1]' \
       with lines lw 2
 
   set title 'spectra'
