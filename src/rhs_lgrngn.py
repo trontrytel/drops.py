@@ -39,7 +39,7 @@ class rhs_lgrngn:
     except OSError:
       pass
     self.out_snd = open(self.outdir + "/sounding.txt", mode='w')
-    self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\tS_VI [kg/kg]\n")
+    self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\tS_VI [kg/kg]\tH [kg/kg]\tSO2 [kg/kg]\n")
     self.out_dry = open(self.outdir + "/spec_dry.txt", mode='w')
     self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-3] (per mass of dry air)\n")
     self.out_wet = open(self.outdir + "/spec_wet.txt", mode='w')
@@ -88,8 +88,12 @@ class rhs_lgrngn:
       self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
 
     ## chem stuff
-    self.prtcls.diag_wet_rng(0,1) # 0 ... 1 m
+    self.prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
     self.prtcls.diag_chem(lgrngn.chem_species_t.S_VI)
+    self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
+    self.prtcls.diag_chem(lgrngn.chem_species_t.H)
+    self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
+    self.prtcls.diag_chem(lgrngn.chem_species_t.SO2)
     self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
    
     self.out_snd.write(u"\n")
