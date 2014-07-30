@@ -10,11 +10,18 @@ set grid
 
 clmn_rv = 3
 clmn_m0 = 4
+clmn_m2 = 6
+clmn_m3 = 7
 
-set multiplot layout 1,2
+set key below maxcols 1
+
+set multiplot layout 1,3
   set title 'sounding'
   set xlabel 'mixing ratio [g/kg]'
   set x2tics
+  set x2label 'specific concentration [mg^{-1}]'
+  set nologscale
+  set xrange [*:*]
   plot \
     'sounding.txt' using (1e3*column(clmn_rv)):($0*outfreq*dt) \
       axes x1y1 \
@@ -22,9 +29,87 @@ set multiplot layout 1,2
       with lines lw 2, \
     'sounding.txt' using (1e-6*column(clmn_m0)):($0*outfreq*dt) \
       axes x2y1 \
-      title 'cloud droplet concentration [mg-1]' \
-      with lines lw 2
+      title 'particle concentration (1-25 μm) [mg^{-1}]' \
+      with lines lw 2, \
+    0 title 'TODO'
 
   set title 'spectra'
-  plot cos(x)
+  set logscale x
+  set logscale x2
+  set x2label 'radius [μm]'
+  set xlabel 'radius [μm]'
+  set xrange [.002:100]
+
+  # FSSP range
+  set arrow from .5,0 to .5,nt*dt nohead
+  set arrow from 25,0 to 25,nt*dt nohead
+
+  mlt = 2
+  num = 10
+  ix0 = 0
+  ix1 = (nt/outfreq)/(num-1)*1
+  ix2 = (nt/outfreq)/(num-1)*2
+  ix3 = (nt/outfreq)/(num-1)*3
+  ix4 = (nt/outfreq)/(num-1)*4
+  ix5 = (nt/outfreq)/(num-1)*5
+  ix6 = (nt/outfreq)/(num-1)*6
+  ix7 = (nt/outfreq)/(num-1)*7
+  ix8 = (nt/outfreq)/(num-1)*8
+  ix9 = (nt/outfreq)/(num-1)*9
+
+  lg(n) = n>0 ? log(n) : 0
+
+  plot \
+    'spec_dry.txt' index ix0 using ($1*1e6):(outfreq*dt*ix0 + mlt*lg($2)) with steps lt 3 title 'dry spectra', \
+    'spec_wet.txt' index ix0 using ($1*1e6):(outfreq*dt*ix0 + mlt*lg($2)) with steps lt 4 title 'wet spectra', \
+    \
+    (outfreq*dt*ix1) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix1 using ($1*1e6):(outfreq*dt*ix1 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix1 using ($1*1e6):(outfreq*dt*ix1 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    (outfreq*dt*ix2) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix2 using ($1*1e6):(outfreq*dt*ix2 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix2 using ($1*1e6):(outfreq*dt*ix2 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    (outfreq*dt*ix3) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix3 using ($1*1e6):(outfreq*dt*ix3 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix3 using ($1*1e6):(outfreq*dt*ix3 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    (outfreq*dt*ix4) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix4 using ($1*1e6):(outfreq*dt*ix4 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix4 using ($1*1e6):(outfreq*dt*ix4 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    (outfreq*dt*ix5) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix5 using ($1*1e6):(outfreq*dt*ix5 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix5 using ($1*1e6):(outfreq*dt*ix5 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    (outfreq*dt*ix6) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix6 using ($1*1e6):(outfreq*dt*ix6 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix6 using ($1*1e6):(outfreq*dt*ix6 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    (outfreq*dt*ix7) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix7 using ($1*1e6):(outfreq*dt*ix7 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix7 using ($1*1e6):(outfreq*dt*ix7 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    (outfreq*dt*ix8) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix8 using ($1*1e6):(outfreq*dt*ix8 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix8 using ($1*1e6):(outfreq*dt*ix8 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    (outfreq*dt*ix9) lc rgbcolor 'black' notitle, \
+    'spec_dry.txt' index ix9 using ($1*1e6):(outfreq*dt*ix9 + mlt*lg($2)) with steps lt 3 title '', \
+    'spec_wet.txt' index ix9 using ($1*1e6):(outfreq*dt*ix9 + mlt*lg($2)) with steps lt 4 title '', \
+    \
+    'sounding.txt' using (column(clmn_m3)/column(clmn_m2)*1e6):($0*outfreq*dt) \
+      title 'effective radius (1-25 μm)' \
+      with lines lt 0 lw 3
+
+  set title 'chem stuff'
+  set nologscale
+  unset arrow
+  set x2label 'TODO'
+  set xlabel 'average pH'
+  plot \
+    0 title 'TODO', \
+    0 title 'TODO', \
+    0 title 'TODO'
 unset multiplot
