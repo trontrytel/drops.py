@@ -82,7 +82,7 @@ class rhs_lgrngn:
     self.out_snd.write(u"\t%g" % (r_v))
 
     ## cloud water
-    self.prtcls.diag_wet_rng(1e-6, 25e-6) # 0 ... 1 m
+    self.prtcls.diag_wet_rng(.5e-6, 25e-6) # 0 ... 1 m
     for k in range(0,4):
       self.prtcls.diag_wet_mom(k)
       self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
