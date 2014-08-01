@@ -29,7 +29,7 @@ set multiplot layout 1,3
       with lines lw 2, \
     'sounding.txt' using (1e-6*column(clmn_m0)):($0*outfreq*dt) \
       axes x2y1 \
-      title 'particle concentration (1-25 μm) [mg^{-1}]' \
+      title 'particle concentration (.5-25 μm) [mg^{-1}]' \
       with lines lw 2, \
     0 title 'TODO'
 
@@ -100,7 +100,7 @@ set multiplot layout 1,3
     'spec_wet.txt' index ix9 using ($1*1e6):(outfreq*dt*ix9 + mlt*lg($2)) with steps lt 4 title '', \
     \
     'sounding.txt' using (column(clmn_m3)/column(clmn_m2)*1e6):($0*outfreq*dt) \
-      title 'effective radius (1-25 μm)' \
+      title 'effective radius (.5-25 μm)' \
       with lines lt 0 lw 3
 
   set title 'chem stuff'
