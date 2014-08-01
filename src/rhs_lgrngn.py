@@ -41,9 +41,9 @@ class rhs_lgrngn:
     self.out_snd = open(self.outdir + "/sounding.txt", mode='w')
     self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\tS_VI [kg/kg]\tH [kg/kg]\tSO2 [kg/kg]\n")
     self.out_dry = open(self.outdir + "/spec_dry.txt", mode='w')
-    self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-3] (per mass of dry air)\n")
+    self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
     self.out_wet = open(self.outdir + "/spec_wet.txt", mode='w')
-    self.out_wet.write(u"#r_d [m] (left bin edge)\tn [kg-3] (per mass of dry air)\n")
+    self.out_wet.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
 
   def step(self, rhod, th_d, r_v, dot_th, dot_rv):
     th_d_copy = th_d.copy()
