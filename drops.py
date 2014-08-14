@@ -62,12 +62,13 @@ rhs = rhs_lgrngn.rhs_lgrngn(
   args.sd_conc, 
   { 
     args.kappa : lognormal(args.n_tot, args.meanr, args.gstdv)
-  },
-  {
-    chem_species_t.SO2  : args.chem_SO2,
-    chem_species_t.O3   : args.chem_O3,
-    chem_species_t.H2O2 : args.chem_H2O2
   }
+#,
+#  {
+#    chem_species_t.SO2  : args.chem_SO2,
+#    chem_species_t.O3   : args.chem_O3,
+#    chem_species_t.H2O2 : args.chem_H2O2
+#  }
 )
 parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, rhs)
 
