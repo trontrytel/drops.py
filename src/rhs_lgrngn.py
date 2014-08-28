@@ -50,8 +50,8 @@ class rhs_lgrngn:
     r_v_copy = r_v.copy()
     self.prtcls.step_sync(self.opts, th_d_copy, r_v_copy, rhod)
     self.prtcls.step_async(self.opts)
-    dot_th += th_d_copy - th_d
-    dot_rv += r_v_copy - r_v
+    dot_th += (th_d_copy - th_d) / self.dt
+    dot_rv += (r_v_copy - r_v) / self.dt
 
   def diag(self, rhod, th_d, r_v, t):
     # helper for gnuplot-readable output
