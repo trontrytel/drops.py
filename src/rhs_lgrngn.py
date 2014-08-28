@@ -43,7 +43,7 @@ class rhs_lgrngn:
     self.out_dry = open(self.outdir + "/spec_dry.txt", mode='w')
     self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
     self.out_wet = open(self.outdir + "/spec_wet.txt", mode='w')
-    self.out_wet.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
+    self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
 
   def step(self, rhod, th_d, r_v, dot_th, dot_rv):
     th_d_copy = th_d.copy()
@@ -82,7 +82,7 @@ class rhs_lgrngn:
     self.out_snd.write(u"\t%g" % (r_v))
 
     ## cloud water
-    self.prtcls.diag_wet_rng(.5e-6, 25e-6) # 0 ... 1 m
+    self.prtcls.diag_wet_rng(.5e-6, 25e-6) 
     for k in range(0,4):
       self.prtcls.diag_wet_mom(k)
       self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
