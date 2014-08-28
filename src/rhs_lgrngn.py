@@ -20,6 +20,9 @@ class rhs_lgrngn:
     self.opts.sedi = False
     self.opts.coal = False
 
+    # disabling substepping
+    self.sstp_cond = 1
+
     if chem_gas != None:
       self.opts.chem = True
       self.opts.chem_gas = chem_gas
