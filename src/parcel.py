@@ -40,4 +40,4 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
 
     # doing diagnostics / output
     if (t % outfreq == 0):
-      rhs.diag(rhod, th_d, r_v, t * rhs.dt)
+      rhs.diag(rhod, th_d, r_v, (t+1) * rhs.dt) #TODO: should be t or t+1?
