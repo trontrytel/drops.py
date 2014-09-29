@@ -39,5 +39,5 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
     rhod = rhod_fun(p_d, th_d)
 
     # doing diagnostics / output
-    if (t % outfreq == 0):
+    if ((t+1) % outfreq == 0): #TODO: should be t or t+1?
       rhs.diag(rhod, th_d, r_v, (t+1) * rhs.dt) #TODO: should be t or t+1?
