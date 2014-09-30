@@ -1,15 +1,17 @@
 from libcloudphxx.common import R_d, c_pd, g, p_1000
 import numpy as np
 
+#TODO: should be moved to new file with physical equations etc. ??
+# perfect gas for for dry air
+def T_fun(p_d, th_d):
+  return th_d * pow(p_d / p_1000, R_d / c_pd)                                                           
+def rhod_fun(p_d, th_d):
+  return p_d / R_d / T_fun(p_d, th_d)
+
+
 # p_d, th_d, r_v should contain initial values
 #                and are overwritten!
 def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
-
-  # perfect gas for for dry air
-  def rhod_fun(p_d, th_d):
-    def T(p_d, th_d):
-      return th_d * pow(p_d / p_1000, R_d / c_pd)
-    return p_d / R_d / T(p_d, th_d)
 
   # t=0 stuff
   rhod = rhod_fun(p_d, th_d)
@@ -21,7 +23,7 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
   shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', rhs.outdir + '/quicklook.gpi')
 
   # Euler-like integration
-  for t in range(nt):
+  for it in range(nt):
     #TODO: update process name :)
 
     # first, adjusting thr pressure using hydrostatic law
@@ -39,5 +41,5 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
     rhod = rhod_fun(p_d, th_d)
 
     # doing diagnostics / output
-    if ((t+1) % outfreq == 0): #TODO: should be t or t+1?
-      rhs.diag(rhod, th_d, r_v, (t+1) * rhs.dt) #TODO: should be t or t+1?
+    if ((it+1) % outfreq == 0): #TODO: should be t or t+1?
+      rhs.diag(rhod, th_d, r_v, (it+1) * rhs.dt) #TODO: should be t or t+1?

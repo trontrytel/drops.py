@@ -62,10 +62,10 @@ class rhs_lgrngn:
     dot_th += (th_d_copy - th_d) / self.dt
     dot_rv += (r_v_copy - r_v) / self.dt
 
-  def diag(self, rhod, th_d, r_v, t):
+  def diag(self, rhod, th_d, r_v, time):
     #opening hdf files
-    fhdf_spec = h5py.File(self.outdir + "/hdf_output/spec_drywet_" + str(int(t)) + ".hdf", mode='w')
-    fhdf_sound = h5py.File(self.outdir + "/hdf_output/sounding_" + str(int(t)) + ".hdf", mode='w')
+    fhdf_spec = h5py.File(self.outdir + "/hdf_output/spec_drywet_" + str(int(time)) + ".hdf", mode='w')
+    fhdf_sound = h5py.File(self.outdir + "/hdf_output/sounding_" + str(int(time)) + ".hdf", mode='w')
 
     # helper for gnuplot-readable output
     def save(out, xx, yy):
