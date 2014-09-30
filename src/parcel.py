@@ -1,5 +1,5 @@
 from libcloudphxx.common import R_d, c_pd, g, p_1000
-from numpy import array as arr_t
+import numpy as np
 
 # p_d, th_d, r_v should contain initial values
 #                and are overwritten!
@@ -28,8 +28,8 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
     p_d += rhs.dt * (-g * rhod * w)
 
     # computing rhs for th and rv
-    dot_th = arr_t([0.])
-    dot_rv = arr_t([0.])
+    dot_th = np.array([0.])
+    dot_rv = np.array([0.])
     rhod = rhod_fun(p_d, th_d)
     rhs.step(rhod, th_d, r_v, dot_th, dot_rv)
 

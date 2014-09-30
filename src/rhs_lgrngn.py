@@ -1,5 +1,5 @@
 from libcloudphxx import lgrngn
-from numpy import frombuffer, arange, ndarray
+import numpy as np
 from io import open
 from os import mkdir
 import h5py
@@ -32,8 +32,8 @@ class rhs_lgrngn:
     # TODO: outfreq
     self.outdir = outdir
     self.dt = dt
-    self.bins_dry = 1e-6 * pow(10, -3 + arange(0, 40) * .1)
-    self.bins_wet = 1e-6 * pow(10, -3 + arange(0, 25) * .2)
+    self.bins_dry = 1e-6 * pow(10, -3 + np.arange(40) * .1)
+    self.bins_wet = 1e-6 * pow(10, -3 + np.arange(25) * .2)
 
   # t=0 stuff
   def init(self, rhod, th_d, r_v):
@@ -74,12 +74,12 @@ class rhs_lgrngn:
       out.write(u"\n\n") # gnuplot treats "\n\n" as dataset separator (plot ... index n)
 
     # outputting spec_dry.txt
-    bins = ndarray((self.bins_dry.size - 1,))
+    bins = np.empty(self.bins_dry.size - 1)
     for i in range(0, bins.size) :
       self.prtcls.diag_dry_rng(self.bins_dry[i], self.bins_dry[i+1])
       self.prtcls.diag_dry_mom(0)
-      bins[i] = frombuffer(self.prtcls.outbuf())
-    save(self.out_dry, self.bins_dry[0:-1], bins)
+      bins[i] = np.frombuffer(self.prtcls.outbuf())
+      save(self.out_dry, self.bins_dry[0:-1], bins)
     # outputting to hdf
     dry_r_h5 = fhdf_spec.create_dataset("dry_radius", (bins.size,), dtype='f')
     dry_r_h5.attrs["Units"] = "m"
@@ -90,11 +90,11 @@ class rhs_lgrngn:
 
 
     # outputting spec_wet.txt
-    bins = ndarray((self.bins_wet.size - 1,))
+    bins = np.empty(self.bins_wet.size - 1)
     for i in range(0, bins.size) :
       self.prtcls.diag_wet_rng(self.bins_wet[i], self.bins_wet[i+1])
       self.prtcls.diag_wet_mom(0)
-      bins[i] = frombuffer(self.prtcls.outbuf())
+      bins[i] = np.frombuffer(self.prtcls.outbuf())
     save(self.out_wet, self.bins_wet[0:-1], bins)
     # outputting to hdf
     wet_r_h5 = fhdf_spec.create_dataset("wet_radius", (bins.size,), dtype='f')
@@ -126,16 +126,16 @@ class rhs_lgrngn:
     self.prtcls.diag_wet_rng(.5e-6, 25e-6) 
     for k in range(0,4):
       self.prtcls.diag_wet_mom(k)
-      self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
+      self.out_snd.write(u"\t%g" % (np.frombuffer(self.prtcls.outbuf())))
 
 
     ## chem stuff
     self.prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
     self.prtcls.diag_chem(lgrngn.chem_species_t.S_VI)
-    self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
+    self.out_snd.write(u"\t%g" % (np.frombuffer(self.prtcls.outbuf())))
     self.prtcls.diag_chem(lgrngn.chem_species_t.H)
-    self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
+    self.out_snd.write(u"\t%g" % (np.frombuffer(self.prtcls.outbuf())))
     self.prtcls.diag_chem(lgrngn.chem_species_t.SO2)
-    self.out_snd.write(u"\t%g" % (frombuffer(self.prtcls.outbuf())))
+    self.out_snd.write(u"\t%g" % (np.frombuffer(self.prtcls.outbuf())))
    
     self.out_snd.write(u"\n")
