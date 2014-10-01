@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from drops_py import parcel, rhs_lgrngn
 from libcloudphxx.common import p_vs, eps, p_1000, R_d, c_pd
 from libcloudphxx.lgrngn import chem_species_t
-from numpy import array as arr_t
+import numpy as np
 from math import exp, log, sqrt, pi
 
 # command-line options
@@ -39,7 +39,7 @@ prsr_b2m = sprsr.add_parser('blk_2m')
 args = prsr.parse_args()
 
 # computing state variables
-p_v = arr_t([args.RH * p_vs(args.T)])
+p_v = np.array([args.RH * p_vs(args.T)])
 p_d = args.p - p_v
 r_v = eps * p_v / p_d
 th_d = args.T * pow(p_1000 / p_d, R_d / c_pd)
