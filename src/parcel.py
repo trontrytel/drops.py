@@ -1,5 +1,6 @@
 from libcloudphxx.common import R_d, c_pd, g, p_1000
 import numpy as np
+import output
 
 #TODO: should be moved to new file with physical equations etc. ??
 # perfect gas for for dry air
@@ -16,11 +17,17 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
   # t=0 stuff
   rhod = rhod_fun(p_d, th_d)
   rhs.init(rhod, th_d, r_v)
-  rhs.diag(rhod, th_d, r_v, 0)
+
+  # preparing output
+  out_file = output.output(rhs.outdir)
+  out_file.initial_info()
+  # saving initial values
+  out_file.diag(rhs.prtcls, rhod, th_d, r_v, 0)
 
   # placing a quick-look gnuplot file in the output directory
   import os, shutil
   shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', rhs.outdir + '/quicklook.gpi')
+  
 
   # Euler-like integration
   for it in range(nt):
@@ -42,4 +49,4 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
 
     # doing diagnostics / output
     if ((it+1) % outfreq == 0): #TODO: should be t or t+1?
-      rhs.diag(rhod, th_d, r_v, (it+1) * rhs.dt) #TODO: should be t or t+1?
+      out_file.diag(rhs.prtcls, rhod, th_d, r_v, (it+1) * rhs.dt) #TODO: should be t or t+1?
