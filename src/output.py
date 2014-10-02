@@ -79,7 +79,9 @@ class output_lgr:
     self.rv_h5.attrs["Units"] = "kg/kg"
 
 
-  def diag(self, prtcls, rhod, th_d, r_v, time, it_out):
+  def diag(self, prtcls, rhod, th_d, r_v, itime):
+    # index of itime in the array self.time
+    it_out = self.time.searchsorted(itime)
 
     def save(out, xx, yy):
       for x, y in zip(xx, yy):
