@@ -4,7 +4,7 @@ import numpy as np
 
 class output_lgr:
 
-  def __init__(self, outdir, time_out):
+  def __init__(self, outdir, time_out, mom_diag=np.arange(4)):
     self.outdir_hdf = outdir + "/hdf_output/"
     try:
       os.mkdir(outdir)
@@ -15,6 +15,7 @@ class output_lgr:
     except OSError:
       pass
     self.time = time_out
+    self.mom_diag = mom_diag 
     self.hdf_spec = h5py.File(self.outdir_hdf + "spec_drywet.hdf", mode='w')
     self.hdf_sound = h5py.File(self.outdir_hdf + "sounding.hdf", mode='w')
     self.out_snd = open(outdir + "/sounding.txt", mode='w')
@@ -33,18 +34,23 @@ class output_lgr:
     self.rho_h5 = self.hdf_sound.create_dataset("rhod", (self.time.size,), dtype='f') 
     self.thd_h5 = self.hdf_sound.create_dataset("thd", (self.time.size,), dtype='f')
     self.rv_h5 = self.hdf_sound.create_dataset("rv", (self.time.size,), dtype='f')    
+    self.mom_h5 = self.hdf_sound.create_dataset("mom", 
+                                 (self.time.size, self.mom_diag.size), dtype='f')
 
     # description of the txt files
     self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\tS_VI [kg/kg]\tH [kg/kg]\tSO2 [kg/kg]\n")
     self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
     self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
 
-    # attaching scales, units etc. to the hdf variables 
+    # creating data sets that will be used as scales
     self.hdf_spec["time"] = self.time
     self.hdf_sound["time"] = self.time 
-    self.hdf_spec["bins_dry"] = self.bins_dry[:-1] # TODO should be 0.5 * (bins_wet[:-1] + bins_wet[1:]) ??    
+    self.hdf_spec["bins_dry"] = self.bins_dry[:-1] # TODO should be 0.5 * (bins_wet[:-1] + bins_wet[1:]) ??  talk to AS   
     self.hdf_spec["bins_wet"] = self.bins_wet[:-1]
+    self.hdf_sound["mom_ord"] = self.mom_diag
 
+
+    # attaching scales, units etc. to the hdf variables  
     self.dry_n_h5.dims.create_scale(self.hdf_spec["time"], "time")
     self.dry_n_h5.dims[0].attach_scale(self.hdf_spec["time"])
     self.dry_n_h5.dims[0].label = 's'
@@ -75,6 +81,16 @@ class output_lgr:
     self.rv_h5.dims[0].attach_scale(self.hdf_sound["time"])
     self.rv_h5.dims[0].label = 's'
     self.rv_h5.attrs["Units"] = "kg/kg"
+
+    self.mom_h5.dims.create_scale(self.hdf_sound["time"], "time")
+    self.mom_h5.dims[0].attach_scale(self.hdf_sound["time"])
+    self.mom_h5.dims[0].label = 's'
+    self.mom_h5.dims.create_scale(self.hdf_sound["mom_ord"], "moments_orders")
+    self.mom_h5.dims[1].attach_scale(self.hdf_sound["mom_ord"])
+    self.mom_h5.dims[1].label = 'order' #TODO ?
+    self.mom_h5.attrs["Units"] = "TODO" #TODO?
+
+
 
 
   def diag(self, prtcls, rhod, th_d, r_v, itime):
@@ -114,9 +130,15 @@ class output_lgr:
 
     ## cloud water #TODO - hdf
     prtcls.diag_wet_rng(.5e-6, 25e-6)
-    for k in range(0,4):
+    moments = []
+    for k in range(4): #TODO doesn't work for self.mom_sistr (even if array is int type), why..??
+      import pdb
+      #pdb.set_trace() 
+      print type(k)
       prtcls.diag_wet_mom(k)
       self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
+      moments.append(np.frombuffer(prtcls.outbuf())[0])
+    self.mom_h5[it_out,:] =  moments
 
     ## chem stuff #TODO import lib
     #prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
