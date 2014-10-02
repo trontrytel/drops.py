@@ -43,6 +43,7 @@ class output_lgr:
 
     # attaching scales, units etc. to the hdf variables 
     self.hdf_spec["time"] = self.time
+    self.hdf_sound["time"] = self.time 
     self.hdf_spec["bins_dry"] = self.bins_dry[:-1] # TODO should be 0.5 * (bins_wet[:-1] + bins_wet[1:]) ??    
     self.hdf_spec["bins_wet"] = self.bins_wet[:-1]
 
@@ -58,22 +59,22 @@ class output_lgr:
     self.wet_n_h5.dims[0].attach_scale(self.hdf_spec["time"])
     self.wet_n_h5.dims[0].label = 's'
     self.wet_n_h5.dims.create_scale(self.hdf_spec["bins_wet"], "wet_radius")
-    self.wet_n_h5.dims[0].attach_scale(self.hdf_spec["bins_wet"])
-    self.wet_n_h5.dims[0].label = 'm'
+    self.wet_n_h5.dims[1].attach_scale(self.hdf_spec["bins_wet"])
+    self.wet_n_h5.dims[1].label = 'm'
     self.wet_n_h5.attrs["Units"] = "1/kg"
 
-    self.rho_h5.dims.create_scale(self.hdf_spec["time"], "time")
-    self.rho_h5.dims[0].attach_scale(self.hdf_spec["time"])
+    self.rho_h5.dims.create_scale(self.hdf_sound["time"], "time")
+    self.rho_h5.dims[0].attach_scale(self.hdf_sound["time"])
     self.rho_h5.dims[0].label = 's'
     self.rho_h5.attrs["Units"] = "kg/m3"
 
-    self.thd_h5.dims.create_scale(self.hdf_spec["time"], "time")
-    self.thd_h5.dims[0].attach_scale(self.hdf_spec["time"])
+    self.thd_h5.dims.create_scale(self.hdf_sound["time"], "time")
+    self.thd_h5.dims[0].attach_scale(self.hdf_sound["time"])
     self.thd_h5.dims[0].label = 's'
     self.thd_h5.attrs["Units"] = "K"
 
-    self.rv_h5.dims.create_scale(self.hdf_spec["time"], "time")
-    self.rv_h5.dims[0].attach_scale(self.hdf_spec["time"])
+    self.rv_h5.dims.create_scale(self.hdf_sound["time"], "time")
+    self.rv_h5.dims[0].attach_scale(self.hdf_sound["time"])
     self.rv_h5.dims[0].label = 's'
     self.rv_h5.attrs["Units"] = "kg/kg"
 
