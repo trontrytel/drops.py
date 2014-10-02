@@ -21,7 +21,6 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
   # preparing output
   time_out = rhs.dt * np.arange(0, nt+1, outfreq) # nt+1 to include nt in the time_out
   out_file = output.output_lgr(rhs.outdir, time_out)
-  out_file.initial_info()
   # saving initial values
   out_file.diag(rhs.prtcls, rhod, th_d, r_v, 0)
 

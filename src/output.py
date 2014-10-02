@@ -24,7 +24,6 @@ class output_lgr:
     self.bins_wet = 1e-6 * pow(10, -3 + np.arange(25) * .2)
     # creating hdf varibales  
     # concentratio per size of dry particles
-    # TODO: this concentration can change in time???
     self.dry_n_h5 = self.hdf_spec.create_dataset("dry_number", 
                                  (self.time.size, self.bins_dry.size - 1), dtype='f')
     # concentratio per size of wet particles   
@@ -35,8 +34,7 @@ class output_lgr:
     self.thd_h5 = self.hdf_sound.create_dataset("thd", (self.time.size,), dtype='f')
     self.rv_h5 = self.hdf_sound.create_dataset("rv", (self.time.size,), dtype='f')    
 
-
-  def initial_info(self): # TODO should be part of __init__? 
+    # description of the txt files
     self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\tS_VI [kg/kg]\tH [kg/kg]\tSO2 [kg/kg]\n")
     self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
     self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
