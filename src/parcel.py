@@ -29,7 +29,7 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
   import os, shutil
   shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', rhs.outdir + '/quicklook.gpi')
   
-
+  it_out = 1 # TODO better? 
   # Euler-like integration
   for it in range(nt):
     #TODO: update process name :)
@@ -49,7 +49,6 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
     rhod = rhod_fun(p_d, th_d)
 
     # doing diagnostics / output
-    it_out = 1 # TODO better?
     if ((it+1) in it_out_ar):
       out_file.diag(rhs.prtcls, rhod, th_d, r_v, (it+1) * rhs.dt, it_out) 
       it_out += 1
