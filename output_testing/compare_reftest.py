@@ -3,10 +3,10 @@ import h5py
 import os, sys, getopt
 import pdb
 
-def comparing_hdf(dir_new, dir_ref, filetype):
+def comparing_hdf(dir_new, dir_ref, filetype='hdf'):
     for filename in os.listdir(dir_ref+"/hdf_output/"):
-        if filename.startswith(filetype):
-            print filename
+        if filename.endswith(filetype):
+            print "\n", filename
             f_ref = h5py.File(dir_ref+"/hdf_output/" + filename, "r")
             f_new = h5py.File(dir_new+"/hdf_output/" + filename, "r")
             for key in f_ref.keys():
@@ -17,8 +17,7 @@ def comparing_hdf(dir_new, dir_ref, filetype):
 
 
 def main(dir_new, dir_ref):
-    comparing_hdf(dir_new, dir_ref, "sounding")
-    comparing_hdf(dir_new, dir_ref, "spec")
+    comparing_hdf(dir_new, dir_ref)
 
 
 if __name__ == "__main__":
