@@ -1,13 +1,7 @@
-from libcloudphxx.common import R_d, c_pd, g, p_1000
+from libcloudphxx.common import g
+import analytical_equations as eq
 import numpy as np
 import output
-
-#TODO: should be moved to new file with physical equations etc. ??
-# perfect gas for for dry air
-def T_fun(p_d, th_d):
-  return th_d * pow(p_d / p_1000, R_d / c_pd)                                                           
-def rhod_fun(p_d, th_d):
-  return p_d / R_d / T_fun(p_d, th_d)
 
 
 # p_d, th_d, r_v should contain initial values
@@ -15,7 +9,7 @@ def rhod_fun(p_d, th_d):
 def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
 
   # t=0 stuff
-  rhod = rhod_fun(p_d, th_d)
+  rhod = eq.rhod_fun(p_d, th_d)
   rhs.init(rhod, th_d, r_v)
 
   # preparing output
@@ -38,13 +32,13 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
     # computing rhs for th and rv
     dot_th = np.array([0.])
     dot_rv = np.array([0.])
-    rhod = rhod_fun(p_d, th_d)
+    rhod = eq.rhod_fun(p_d, th_d)
     rhs.step(rhod, th_d, r_v, dot_th, dot_rv)
 
     # applying the rhs
     th_d += rhs.dt * dot_th
     r_v  += rhs.dt * dot_rv
-    rhod = rhod_fun(p_d, th_d)
+    rhod = eq.rhod_fun(p_d, th_d)
 
     # doing diagnostics / output
     if ( ((it+1) * rhs.dt) in time_out):
