@@ -1,7 +1,5 @@
 from libcloudphxx import lgrngn
 import numpy as np
-from io import open
-from os import mkdir
 import h5py
 
 class rhs_lgrngn:
