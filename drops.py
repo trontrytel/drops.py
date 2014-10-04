@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 from argparse import ArgumentParser
-from drops_py import parcel, rhs_lgrngn
-from libcloudphxx.common import p_vs, eps, p_1000, R_d, c_pd
-from libcloudphxx.lgrngn import chem_species_t
+from drops_py import rhs_lgrngn, parcel
+import libcloudphxx.common as libcom 
+import libcloudphxx as libcl
 import numpy as np
-from math import exp, log, sqrt, pi
+import math 
 
 # command-line options
 prsr = ArgumentParser(description='drops.py - a parcel model based on libcloudph++')
@@ -39,10 +39,10 @@ prsr_b2m = sprsr.add_parser('blk_2m')
 args = prsr.parse_args()
 
 # computing state variables
-p_v = np.array([args.RH * p_vs(args.T)])
+p_v = np.array([args.RH * libcom.p_vs(args.T)])
 p_d = args.p - p_v
-r_v = eps * p_v / p_d
-th_d = args.T * pow(p_1000 / p_d, R_d / c_pd)
+r_v = libcom.eps * p_v / p_d
+th_d = args.T * pow(libcom.p_1000 / p_d, libcom.R_d / libcom.c_pd)
 
 class lognormal:
   def __init__(self, n_tot, meanr, gstdv):
@@ -51,9 +51,9 @@ class lognormal:
     self.n_tot = n_tot
  
   def __call__(self, lnr):
-    return self.n_tot * exp(
-      -pow((lnr - log(self.meanr)), 2) / 2 / pow(log(self.stdev),2)
-    ) / log(self.stdev) / sqrt(2*pi);
+    return self.n_tot * math.exp(
+      -pow((lnr - math.log(self.meanr)), 2) / 2 / pow(math.log(self.stdev),2)
+    ) / math.log(self.stdev) / math.sqrt(2*math.pi);
 
 # performing the simulation
 rhs = rhs_lgrngn.rhs_lgrngn(
@@ -65,9 +65,9 @@ rhs = rhs_lgrngn.rhs_lgrngn(
   }
 #,
 #  {
-#    chem_species_t.SO2  : args.chem_SO2,
-#    chem_species_t.O3   : args.chem_O3,
-#    chem_species_t.H2O2 : args.chem_H2O2
+#    libcl.lgrngn.chem_species_t.SO2  : args.chem_SO2,
+#    libcl.lgrngn.chem_species_t.O3   : args.chem_O3,
+#    libcl.lgrngn.chem_species_t.H2O2 : args.chem_H2O2
 #  }
 )
 parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, rhs)

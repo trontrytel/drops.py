@@ -1,4 +1,4 @@
-from libcloudphxx.common import g
+import libcloudphxx.common as libcom 
 import analytical_equations as eq
 import numpy as np
 import output
@@ -27,7 +27,7 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
     #TODO: update process name :)
 
     # first, adjusting thr pressure using hydrostatic law
-    p_d += rhs.dt * (-g * rhod * w)
+    p_d += rhs.dt * (-libcom.g * rhod * w)
 
     # computing rhs for th and rv
     dot_th = np.array([0.])
