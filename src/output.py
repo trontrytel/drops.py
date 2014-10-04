@@ -59,8 +59,6 @@ class output_lgr:
 
     # creating data sets that will be used as scales in sounding.hdf
     self.hdf_sound["time"] = self.time
-    self.hdf_sound["mom_ord"] = self.mom_diag
-    self.hdf_sound["chem_sp"] = self.chem_sp
 
     # creating hdf varibales and attaching scales, units etc.  
     # sounding: dry density, dry pot. temp., water vapour mix. rat.

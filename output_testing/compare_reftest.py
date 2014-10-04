@@ -12,7 +12,7 @@ def comparing_hdf(dir_new, dir_ref, filetype='hdf'):
             for key in f_ref.keys():
                 if (np.array(f_ref[key]) == np.array(f_new[key])).all():
                     print "\n", "values of " +  key + " OK "
-                    if key not in ["time", "bins_dry", "bins_wet", "mom_ord", "chem_sp"]:
+                    if key not in ["time", "bins_dry", "bins_wet"]:
                         print "new files: unit of ", key, "-", f_new[key].attrs["Units"]
                         print "new files: dimensions of ", key, ":"
                         for dim in f_new[key].dims:
@@ -22,8 +22,6 @@ def comparing_hdf(dir_new, dir_ref, filetype='hdf'):
                      print "Problems!! values of " + key + " differ"
             
                 
-
-
 def main(dir_new, dir_ref):
     comparing_hdf(dir_new, dir_ref)
 
