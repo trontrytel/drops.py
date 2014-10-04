@@ -67,8 +67,8 @@ class output_lgr:
     variables_sound = ["rhod", "thd", "rv"]
     units_sound = {"rhod":"kg/m^3", "thd":"K", "rv":"kg/kg"} 
     for i in self.mom_diag:
-      variables_sound.append("mom_nowy" + str(i))
-      units_sound["mom_nowy" + str(i)] = "m^" + str(i) #TODO is it ok??
+      variables_sound.append("mom_" + str(i))
+      units_sound["mom_" + str(i)] = "m^" + str(i) #TODO is it ok??
     for sp in self.chem_sp:
       variables_sound.append("conc_" + str(sp)) #TODO is it indeed concentration?
       units_sound["conc_" + str(sp)] = "TODO" 
@@ -129,7 +129,7 @@ class output_lgr:
     for k in self.mom_diag: 
       prtcls.diag_wet_mom(k)
       self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
-      getattr(self,'mom_nowy' + str(k))[it_out] = np.frombuffer(prtcls.outbuf())
+      getattr(self,'mom_' + str(k))[it_out] = np.frombuffer(prtcls.outbuf())
 
     ## chem stuff 
     prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
