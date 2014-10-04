@@ -41,6 +41,6 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
     rhod = eq.rhod_fun(p_d, th_d)
 
     # doing diagnostics / output
-    if ( ((it+1) * rhs.dt) in time_out):
+    if ((it+1)  % outfreq == 0):
       out_file.diag(rhs.prtcls, rhod, th_d, r_v, (it+1) * rhs.dt) 
 
