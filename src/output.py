@@ -2,10 +2,13 @@ import os
 import h5py
 import numpy as np
 from libcloudphxx import lgrngn
+import pdb
 
 class output_lgr:
 
-  def __init__(self, outdir, time_out, mom_diag=np.arange(4), chem_sp = ["S_VI", "H", "SO2"]):
+  def __init__(self, outdir, time_out, mom_diag=range(4), chem_sp = ["S_VI", "H", "SO2"],
+               bins_dry = 1e-6 * pow(10, -3 + np.arange(40) * .1),
+               bins_wet = 1e-6 * pow(10, -3 + np.arange(25) * .2)):
     self.outdir_hdf = outdir + "/hdf_output/"
     try:
       os.mkdir(outdir)
@@ -18,90 +21,72 @@ class output_lgr:
     self.time = time_out
     self.mom_diag = mom_diag 
     self.chem_sp = chem_sp
+    self.bins_dry = bins_dry
+    self.bins_wet = bins_wet
     self.hdf_spec = h5py.File(self.outdir_hdf + "spec_drywet.hdf", mode='w')
     self.hdf_sound = h5py.File(self.outdir_hdf + "sounding.hdf", mode='w')
     self.out_snd = open(outdir + "/sounding.txt", mode='w')
     self.out_dry = open(outdir + "/spec_dry.txt", mode='w')
     self.out_wet = open(outdir + "/spec_wet.txt", mode='w')
-    self.bins_dry = 1e-6 * pow(10, -3 + np.arange(40) * .1)
-    self.bins_wet = 1e-6 * pow(10, -3 + np.arange(25) * .2)
-    # creating hdf varibales  
-    # concentratio per size of dry particles
-    self.dry_n_h5 = self.hdf_spec.create_dataset("dry_number", 
-                                 (self.time.size, self.bins_dry.size - 1), dtype='f')
-    # concentratio per size of wet particles   
-    self.wet_n_h5 = self.hdf_spec.create_dataset("wet_number", 
-                                 (self.time.size, self.bins_wet.size - 1), dtype='f') 
-    # sounding: dry density, dry pot. temp., water vapour mix. rat.
-    self.rho_h5 = self.hdf_sound.create_dataset("rhod", (self.time.size,), dtype='f') 
-    self.thd_h5 = self.hdf_sound.create_dataset("thd", (self.time.size,), dtype='f')
-    self.rv_h5 = self.hdf_sound.create_dataset("rv", (self.time.size,), dtype='f')    
-    self.mom_h5 = self.hdf_sound.create_dataset("mom", 
-                                 (self.time.size, self.mom_diag.size), dtype='f')
-    self.chem_h5 = self.hdf_sound.create_dataset("chem",
-                                 (self.time.size, len(self.chem_sp)), dtype='f')
 
-    # description of the txt files
-    self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\tS_VI [kg/kg]\tH [kg/kg]\tSO2 [kg/kg]\n")
-    self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
-    self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
 
-    # creating data sets that will be used as scales
+    # creating data sets that will be used as scales in spec_drywet.hdf               
     self.hdf_spec["time"] = self.time
-    self.hdf_sound["time"] = self.time 
-    self.hdf_spec["bins_dry"] = self.bins_dry[:-1] # TODO should be 0.5 * (bins_wet[:-1] + bins_wet[1:]) ??  talk to AS   
+    self.hdf_spec["bins_dry"] = self.bins_dry[:-1]
     self.hdf_spec["bins_wet"] = self.bins_wet[:-1]
+  
+  # creating hdf varibales
+    variables_spec = ['dry_number', 'wet_number']
+    # concentratio per size of dry particles
+    self.dry_number = self.hdf_spec.create_dataset("dry_number",
+                                 (self.time.size, self.bins_dry.size - 1), dtype='f')
+    # concentratio per size of wet particles
+    self.wet_number = self.hdf_spec.create_dataset("wet_number",
+                                 (self.time.size, self.bins_wet.size - 1), dtype='f')
+
+    # attaching scales, units etc. to the hdf variables
+    self.dry_number.dims.create_scale(self.hdf_spec["bins_dry"], "dry_radius")
+    self.dry_number.dims[1].attach_scale(self.hdf_spec["bins_dry"])
+    self.wet_number.dims.create_scale(self.hdf_spec["bins_wet"], "wet_radius")
+    self.wet_number.dims[1].attach_scale(self.hdf_spec["bins_wet"])
+    for var in variables_spec:
+      getattr(self,var).dims.create_scale(self.hdf_spec["time"], "time")
+      getattr(self,var).dims[0].attach_scale(self.hdf_spec["time"])
+      getattr(self,var).dims[0].label = 's'
+      getattr(self,var).dims[1].label = 'm'
+      getattr(self,var).attrs["Units"] = "1/kg"
+
+
+    # creating data sets that will be used as scales in sounding.hdf
+    self.hdf_sound["time"] = self.time
     self.hdf_sound["mom_ord"] = self.mom_diag
     self.hdf_sound["chem_sp"] = self.chem_sp
 
-    # attaching scales, units etc. to the hdf variables  
-    self.dry_n_h5.dims.create_scale(self.hdf_spec["time"], "time")
-    self.dry_n_h5.dims[0].attach_scale(self.hdf_spec["time"])
-    self.dry_n_h5.dims[0].label = 's'
-    self.dry_n_h5.dims.create_scale(self.hdf_spec["bins_dry"], "dry_radius")
-    self.dry_n_h5.dims[1].attach_scale(self.hdf_spec["bins_dry"])
-    self.dry_n_h5.dims[1].label = 'm'
-    self.dry_n_h5.attrs["Units"] = "1/kg"
+    # creating hdf varibales and attaching scales, units etc.  
+    # sounding: dry density, dry pot. temp., water vapour mix. rat.
+    variables_sound = ["rhod", "thd", "rv"]
+    units_sound = {"rhod":"kg/m^3", "thd":"K", "rv":"kg/kg"} 
+    for i in self.mom_diag:
+      variables_sound.append("mom_nowy" + str(i))
+      units_sound["mom_nowy" + str(i)] = "m^" + str(i) #TODO is it ok??
+    for sp in self.chem_sp:
+      variables_sound.append("conc_" + str(sp)) #TODO is it indeed concentration?
+      units_sound["conc_" + str(sp)] = "TODO" 
 
-    self.wet_n_h5.dims.create_scale(self.hdf_spec["time"], "time")
-    self.wet_n_h5.dims[0].attach_scale(self.hdf_spec["time"])
-    self.wet_n_h5.dims[0].label = 's'
-    self.wet_n_h5.dims.create_scale(self.hdf_spec["bins_wet"], "wet_radius")
-    self.wet_n_h5.dims[1].attach_scale(self.hdf_spec["bins_wet"])
-    self.wet_n_h5.dims[1].label = 'm'
-    self.wet_n_h5.attrs["Units"] = "1/kg"
+    for var in variables_sound:
+      print "var sound", var
+      #pdb.set_trace()
+      setattr(self, var, self.hdf_sound.create_dataset(var, (self.time.size,), dtype='f')) 
+      getattr(self, var).dims.create_scale(self.hdf_sound["time"], "time")
+      getattr(self, var).dims[0].attach_scale(self.hdf_sound["time"])
+      getattr(self, var).dims[0].label = 's'
+      getattr(self, var).attrs["Units"] = units_sound[var]
 
-    self.rho_h5.dims.create_scale(self.hdf_sound["time"], "time")
-    self.rho_h5.dims[0].attach_scale(self.hdf_sound["time"])
-    self.rho_h5.dims[0].label = 's'
-    self.rho_h5.attrs["Units"] = "kg/m3"
 
-    self.thd_h5.dims.create_scale(self.hdf_sound["time"], "time")
-    self.thd_h5.dims[0].attach_scale(self.hdf_sound["time"])
-    self.thd_h5.dims[0].label = 's'
-    self.thd_h5.attrs["Units"] = "K"
-
-    self.rv_h5.dims.create_scale(self.hdf_sound["time"], "time")
-    self.rv_h5.dims[0].attach_scale(self.hdf_sound["time"])
-    self.rv_h5.dims[0].label = 's'
-    self.rv_h5.attrs["Units"] = "kg/kg"
-
-    self.mom_h5.dims.create_scale(self.hdf_sound["time"], "time")
-    self.mom_h5.dims[0].attach_scale(self.hdf_sound["time"])
-    self.mom_h5.dims[0].label = 's'
-    self.mom_h5.dims.create_scale(self.hdf_sound["mom_ord"], "moments_orders")
-    self.mom_h5.dims[1].attach_scale(self.hdf_sound["mom_ord"])
-    self.mom_h5.dims[1].label = 'order' #TODO ?
-    self.mom_h5.attrs["Units"] = "TODO" #TODO?
-
-    self.chem_h5.dims.create_scale(self.hdf_sound["time"], "time")
-    self.chem_h5.dims[0].attach_scale(self.hdf_sound["time"])
-    self.chem_h5.dims[0].label = 's'
-    self.chem_h5.dims.create_scale(self.hdf_sound["chem_sp"], "chemical_spieces")
-    self.chem_h5.dims[1].attach_scale(self.hdf_sound["chem_sp"])
-    self.chem_h5.dims[1].label = 'spieces' #TODO ?              
-    self.chem_h5.attrs["Units"] = "kg/kg"
-
+    # description of the txt files #TODO removing chem?
+    self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\tS_VI [kg/kg]\tH [kg/kg]\tSO2 [kg/kg]\n")
+    self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
+    self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
 
 
   def diag(self, prtcls, rhod, th_d, r_v, itime):
@@ -119,7 +104,7 @@ class output_lgr:
       prtcls.diag_dry_mom(0)
       bins[i] = np.frombuffer(prtcls.outbuf())
     save(self.out_dry, self.bins_dry[0:-1], bins)
-    self.dry_n_h5[it_out,:] = bins
+    self.dry_number[it_out,:] = bins
 
     # outputting spec_wet.txt and wet_n to hdf file
     bins = np.empty(self.bins_wet.size - 1)
@@ -128,34 +113,30 @@ class output_lgr:
       prtcls.diag_wet_mom(0)
       bins[i] = np.frombuffer(prtcls.outbuf())      
     save(self.out_wet, self.bins_wet[0:-1], bins)
-    self.wet_n_h5[it_out,:] = bins
+    self.wet_number[it_out,:] = bins
     
     # outputting sounding.txt and sounding.hdf
     self.out_snd.write(u"%g" % (rhod))
     self.out_snd.write(u"\t%g" % (th_d))
     self.out_snd.write(u"\t%g" % (r_v))
     # outputting to hdf 
-    self.rho_h5[it_out] = rhod
-    self.thd_h5[it_out] = th_d
-    self.rv_h5[it_out] =  r_v
+    self.rhod[it_out] = rhod
+    self.thd[it_out] = th_d
+    self.rv[it_out] =  r_v
 
-    ## cloud water #TODO - hdf
-    prtcls.diag_wet_rng(.5e-6, 25e-6)
-    for k in range(4): #TODO doesn't work for self.mom_sistr (even if array is int type), why..??
+    ## cloud water 
+    prtcls.diag_wet_rng(.5e-6, 25e-6) #TODO should be an argument in __inint__?
+    for k in self.mom_diag: 
       prtcls.diag_wet_mom(k)
       self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
-      self.mom_h5[it_out,k] =  np.frombuffer(prtcls.outbuf())
+      getattr(self,'mom_nowy' + str(k))[it_out] = np.frombuffer(prtcls.outbuf())
 
-    ## chem stuff #TODO import lib
+    ## chem stuff 
     prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
-    prtcls.diag_chem(lgrngn.chem_species_t.S_VI) #TODO should be used names from chem_sp? any easy way?
-    self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
-    self.chem_h5[it_out,0] =  np.frombuffer(prtcls.outbuf())
-    prtcls.diag_chem(lgrngn.chem_species_t.H)
-    self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
-    self.chem_h5[it_out,1] =  np.frombuffer(prtcls.outbuf())
-    prtcls.diag_chem(lgrngn.chem_species_t.SO2)
-    self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
-    self.chem_h5[it_out,2] =  np.frombuffer(prtcls.outbuf())
+    for sp in self.chem_sp:
+      prtcls.diag_chem(getattr(lgrngn.chem_species_t, sp)) 
+      self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
+      getattr(self, "conc_" + sp)[it_out] =  np.frombuffer(prtcls.outbuf())
+ 
     self.out_snd.write(u"\n")
 
