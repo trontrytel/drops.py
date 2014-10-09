@@ -7,8 +7,49 @@ import libcloudphxx as libcl
 import numpy as np
 import math 
 
-# command-line options
-prsr = ArgumentParser(description='drops.py - a parcel model based on libcloudph++')
+
+# TODO: move to a separate file
+class defaults:
+  chem_SO2  = 0
+  chem_O3   = 0
+  chem_H2O2 = 0
+  T = None
+  p = None
+  # TODO...
+
+# TODO: move to a separate file
+# Ghan, S., Guzman, G., and Abdul-Razzak, H. 1998 Competition between sea salt
+#   and sulfate particles as cloud condensation nuclei,
+# J. Atmos. Sci., 55, 3340-3347
+# doi:10.1175/1520-0469(1998)055<3340:CBSSAS>2.0.CO;2
+class defaults_Ghan_et_al_1998(defaults):
+  T = 280
+  p = 100000
+  # TODO...
+
+# just a few constants not repeat them below
+desc = 'drops.py - a parcel model based on libcloudph++'
+chcs = ['Ghan_et_al_1998']
+dhlp = 'default parameter set'
+
+# defining command-line options parser - first without help
+# so that it would not be empty when calling parse_known_args() below
+prsr = ArgumentParser(add_help=False, description=desc)
+prsr.add_argument('--defaults', choices=chcs, help=dhlp)
+
+# first parsing the "defaults" only - to know the defaults
+args = prsr.parse_known_args() # TODO: take care of prefix mathing rules = "def" will also match here :(
+defclass = 'defaults'
+if args[0].defaults is not None:
+  defclass = "defaults_" + args[0].defaults
+ctor = globals()[defclass]
+dflts = ctor()
+
+# redefining prsr, this time with help
+prsr = ArgumentParser(add_help=True, description=desc)
+prsr.add_argument('--defaults', choices=chcs, help=dhlp)
+
+# one subparser per one microphysics scheme
 sprsr = prsr.add_subparsers()
 
 ## common options
@@ -17,8 +58,8 @@ prsr.add_argument('--outdir', required=True, help='output directory')
 ## lgrngn options
 prsr_lgr = sprsr.add_parser('lgrngn')
 prsr_lgr.add_argument('--sd_conc',   type=float, required=True, help='number of super droplets')
-prsr_lgr.add_argument('--T',         type=float, required=True, help='initial temperature [K]')
-prsr_lgr.add_argument('--p',         type=float, required=True, help='initial pressure [Pa]')
+prsr_lgr.add_argument('--T',         type=float, required=(dflts.T is None), default=dflts.T, help='initial temperature [K]')
+prsr_lgr.add_argument('--p',         type=float, required=(dflts.p is None), default=dflts.p, help='initial pressure [Pa]')
 prsr_lgr.add_argument('--RH',        type=float, required=True, help='initial relative humidity [1]')
 prsr_lgr.add_argument('--w',         type=float, required=True, help='vertical velocity [m/s]')
 prsr_lgr.add_argument('--dt',        type=float, required=True, help='timestep [s]')
@@ -28,9 +69,9 @@ prsr_lgr.add_argument('--kappa',     type=float, required=True, help='aerosol hy
 prsr_lgr.add_argument('--n_tot',     type=float, required=True, help='aerosol concentration @STP [m-3]')
 prsr_lgr.add_argument('--meanr',     type=float, required=True, help='aerosol mean dry radius [m]')
 prsr_lgr.add_argument('--gstdv',     type=float, required=True, help='aerosol geometric standard deviation [1]')
-prsr_lgr.add_argument('--chem_SO2',  type=float, default=0,     help='SO2 volume concentration [1]')
-prsr_lgr.add_argument('--chem_O3',   type=float, default=0,     help='O3 volume concentration [1]')
-prsr_lgr.add_argument('--chem_H2O2', type=float, default=0,     help='H2O2 volume concentration [1]')
+prsr_lgr.add_argument('--chem_SO2',  type=float, default=dflts.chem_SO2,  help='SO2 volume concentration [1]')
+prsr_lgr.add_argument('--chem_O3',   type=float, default=dflts.chem_O3,   help='O3 volume concentration [1]')
+prsr_lgr.add_argument('--chem_H2O2', type=float, default=dflts.chem_H2O2, help='H2O2 volume concentration [1]')
 
 ## blk_2m options
 prsr_b2m = sprsr.add_parser('blk_2m')
