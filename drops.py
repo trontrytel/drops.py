@@ -10,12 +10,20 @@ import math
 
 # TODO: move to a separate file
 class defaults:
+  sd_conc = None
+  kappa   = None
+  gstdv   = None
+  meanr   = None
+  n_tot   = None
+  T  = None
+  p  = None
+  RH = None
+  w  = None
+  dt = None
+  nt = None
   chem_SO2  = 0
   chem_O3   = 0
   chem_H2O2 = 0
-  T = None
-  p = None
-  # TODO...
 
 # TODO: move to a separate file
 # Ghan, S., Guzman, G., and Abdul-Razzak, H. 1998 Competition between sea salt
@@ -25,11 +33,30 @@ class defaults:
 class defaults_Ghan_et_al_1998(defaults):
   T = 280
   p = 100000
-  # TODO...
+  RH = 1
+
+# TODO: move to a separate file
+class defaults_Kreidenweis_et_al_2003(defaults):
+  sd_conc = 256 #?
+  T = 282.2
+  p = 95000
+  RH = .95
+  w = .5
+  dt = 1 # TODO: this was not there (change when z_max introduced)
+  nt = 500
+  kappa = .61
+  gstdv = 2 
+  n_tot = 566e6 
+  meanr = .04e-6 
+  chem_O3 = 50e-9 
+  chem_SO2 = 200e-12 
+  chem_H2O2 = 500e-12
+
+#--outfreq 10 --
 
 # just a few constants not repeat them below
 desc = 'drops.py - a parcel model based on libcloudph++'
-chcs = ['Ghan_et_al_1998']
+chcs = ['Ghan_et_al_1998', 'Kreidenweis_et_al_2003']
 dhlp = 'default parameter set'
 
 # defining command-line options parser - first without help
@@ -53,22 +80,28 @@ prsr.add_argument('--defaults', choices=chcs, help=dhlp)
 sprsr = prsr.add_subparsers()
 
 ## common options
-prsr.add_argument('--outdir', required=True, help='output directory')
+prsr.add_argument('--outdir',                required=True,                                 help='output directory')
+
+# lgrngn subparser
+prsr_lgr = sprsr.add_parser('lgrngn')
+
+## common options (TODO - breaks compatibility as these options must go before "lgrngn")
+prsr_lgr.add_argument('--outfreq',   type=int,   required=True, help='output frequency (every outfreq timesteps)')
+
+prsr_lgr.add_argument('--T',         type=float, required=(dflts.T  is None), default=dflts.T,  help='initial temperature [K]')
+prsr_lgr.add_argument('--p',         type=float, required=(dflts.p  is None), default=dflts.p,  help='initial pressure [Pa]')
+prsr_lgr.add_argument('--RH',        type=float, required=(dflts.RH is None), default=dflts.RH, help='initial relative humidity [1]')
+prsr_lgr.add_argument('--w',         type=float, required=(dflts.w  is None), default=dflts.w,  help='vertical velocity [m/s]')
+
+prsr_lgr.add_argument('--dt',        type=float, required=(dflts.dt is None), default=dflts.dt, help='timestep [s]')
+prsr_lgr.add_argument('--nt',        type=int,   required=(dflts.nt is None), default=dflts.nt, help='number of timesteps')
 
 ## lgrngn options
-prsr_lgr = sprsr.add_parser('lgrngn')
-prsr_lgr.add_argument('--sd_conc',   type=float, required=True, help='number of super droplets')
-prsr_lgr.add_argument('--T',         type=float, required=(dflts.T is None), default=dflts.T, help='initial temperature [K]')
-prsr_lgr.add_argument('--p',         type=float, required=(dflts.p is None), default=dflts.p, help='initial pressure [Pa]')
-prsr_lgr.add_argument('--RH',        type=float, required=True, help='initial relative humidity [1]')
-prsr_lgr.add_argument('--w',         type=float, required=True, help='vertical velocity [m/s]')
-prsr_lgr.add_argument('--dt',        type=float, required=True, help='timestep [s]')
-prsr_lgr.add_argument('--nt',        type=int,   required=True, help='number of timesteps')
-prsr_lgr.add_argument('--outfreq',   type=int,   required=True, help='output frequency (every outfreq timesteps)')
-prsr_lgr.add_argument('--kappa',     type=float, required=True, help='aerosol hygroscopicity parameter [1]')
-prsr_lgr.add_argument('--n_tot',     type=float, required=True, help='aerosol concentration @STP [m-3]')
-prsr_lgr.add_argument('--meanr',     type=float, required=True, help='aerosol mean dry radius [m]')
-prsr_lgr.add_argument('--gstdv',     type=float, required=True, help='aerosol geometric standard deviation [1]')
+prsr_lgr.add_argument('--sd_conc',   type=float, required=(dflts.sd_conc is None), default=dflts.sd_conc, help='number of super droplets')
+prsr_lgr.add_argument('--kappa',     type=float, required=(dflts.kappa   is None), default=dflts.kappa,   help='aerosol hygroscopicity parameter [1]')
+prsr_lgr.add_argument('--n_tot',     type=float, required=(dflts.n_tot   is None), default=dflts.n_tot,   help='aerosol concentration @STP [m-3]')
+prsr_lgr.add_argument('--meanr',     type=float, required=(dflts.meanr   is None), default=dflts.meanr,   help='aerosol mean dry radius [m]')
+prsr_lgr.add_argument('--gstdv',     type=float, required=(dflts.gstdv   is None), default=dflts.gstdv,   help='aerosol geometric standard deviation [1]')
 prsr_lgr.add_argument('--chem_SO2',  type=float, default=dflts.chem_SO2,  help='SO2 volume concentration [1]')
 prsr_lgr.add_argument('--chem_O3',   type=float, default=dflts.chem_O3,   help='O3 volume concentration [1]')
 prsr_lgr.add_argument('--chem_H2O2', type=float, default=dflts.chem_H2O2, help='H2O2 volume concentration [1]')
@@ -104,6 +137,7 @@ rhs = rhs_lgrngn.rhs_lgrngn(
   { 
     args.kappa : lognormal(args.n_tot, args.meanr, args.gstdv)
   }
+# TODO!!!
 #,
 #  {
 #    libcl.lgrngn.chem_species_t.SO2  : args.chem_SO2,
@@ -116,5 +150,5 @@ parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, rhs)
 # outputting a setup.gpi file
 out = open(args.outdir + '/setup.gpi', mode='w')
 for key, val in vars(args).iteritems():
-  if key != "outdir":
+  if key != "outdir" and key != "defaults":
     out.write(u"%s = %g\n" % (key, float(val)))
