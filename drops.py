@@ -1,58 +1,17 @@
 #!/usr/bin/python
 
-from argparse import ArgumentParser
+# note: before "make install" it uses local one (that's why the directory is named drops_py),
+#       afterwards - the system one is used (the one installed by "make install"
 from drops_py import rhs_lgrngn, parcel
+from drops_py.defaults import defaults
+from drops_py.defaults_Ghan_et_al_1998 import defaults_Ghan_et_al_1998
+from drops_py.defaults_Kreidenweis_et_al_2003 import defaults_Kreidenweis_et_al_2003
+
+from argparse import ArgumentParser
 import libcloudphxx.common as libcom 
 import libcloudphxx as libcl
 import numpy as np
 import math 
-
-
-# TODO: move to a separate file
-class defaults:
-  sd_conc = None
-  kappa   = None
-  gstdv   = None
-  meanr   = None
-  n_tot   = None
-  T  = None
-  p  = None
-  RH = None
-  w  = None
-  dt = None
-  nt = None
-  chem_SO2  = 0
-  chem_O3   = 0
-  chem_H2O2 = 0
-
-# TODO: move to a separate file
-# Ghan, S., Guzman, G., and Abdul-Razzak, H. 1998 Competition between sea salt
-#   and sulfate particles as cloud condensation nuclei,
-# J. Atmos. Sci., 55, 3340-3347
-# doi:10.1175/1520-0469(1998)055<3340:CBSSAS>2.0.CO;2
-class defaults_Ghan_et_al_1998(defaults):
-  T = 280
-  p = 100000
-  RH = 1
-
-# TODO: move to a separate file
-class defaults_Kreidenweis_et_al_2003(defaults):
-  sd_conc = 256 #?
-  T = 282.2
-  p = 95000
-  RH = .95
-  w = .5
-  dt = 1 # TODO: this was not there (change when z_max introduced)
-  nt = 500
-  kappa = .61
-  gstdv = 2 
-  n_tot = 566e6 
-  meanr = .04e-6 
-  chem_O3 = 50e-9 
-  chem_SO2 = 200e-12 
-  chem_H2O2 = 500e-12
-
-#--outfreq 10 --
 
 # just a few constants not repeat them below
 desc = 'drops.py - a parcel model based on libcloudph++'
