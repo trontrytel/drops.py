@@ -6,6 +6,7 @@ import libcloudphxx as libcl
 class output_lgr:
 
   def __init__(self, outdir, time_out, mom_diag=range(4), chem_sp = ["S_VI", "H", "SO2"],
+               cloud_rng = (.5e-6, 25e-6),
                bins_dry = 1e-6 * pow(10, -3 + np.arange(40) * .1),
                bins_wet = 1e-6 * pow(10, -3 + np.arange(25) * .2)):
     self.outdir_hdf = outdir + "/hdf_output/"
@@ -20,6 +21,7 @@ class output_lgr:
     self.time = time_out
     self.mom_diag = mom_diag 
     self.chem_sp = chem_sp
+    self.cloud_rng = cloud_rng
     self.bins_dry = bins_dry
     self.bins_wet = bins_wet
     self.hdf_spec = h5py.File(self.outdir_hdf + "spec_drywet.hdf", mode='w')
@@ -122,7 +124,7 @@ class output_lgr:
     self.rv[it_out] =  r_v
 
     ## cloud water 
-    prtcls.diag_wet_rng(.5e-6, 25e-6) #TODO should be an argument in __inint__?
+    prtcls.diag_wet_rng(self.cloud_rng[0], self.cloud_rng[1])
     for k in self.mom_diag: 
       prtcls.diag_wet_mom(k)
       self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))

@@ -61,6 +61,8 @@ prsr_lgr.add_argument('--kappa',     type=float, required=(dflts.kappa   is None
 prsr_lgr.add_argument('--n_tot',     type=float, required=(dflts.n_tot   is None), default=dflts.n_tot,   help='aerosol concentration @STP [m-3]')
 prsr_lgr.add_argument('--meanr',     type=float, required=(dflts.meanr   is None), default=dflts.meanr,   help='aerosol mean dry radius [m]')
 prsr_lgr.add_argument('--gstdv',     type=float, required=(dflts.gstdv   is None), default=dflts.gstdv,   help='aerosol geometric standard deviation [1]')
+prsr_lgr.add_argument('--cloud_r_min', type=float, required=(dflts.cloud_r_min is None), default=dflts.cloud_r_min, help='minimum radius of cloud droplet range [m]')
+prsr_lgr.add_argument('--cloud_r_max', type=float, required=(dflts.cloud_r_max is None), default=dflts.cloud_r_max, help='maximum radius of cloud droplet range [m]')
 prsr_lgr.add_argument('--chem_SO2',  type=float, default=dflts.chem_SO2,  help='SO2 volume concentration [1]')
 prsr_lgr.add_argument('--chem_O3',   type=float, default=dflts.chem_O3,   help='O3 volume concentration [1]')
 prsr_lgr.add_argument('--chem_H2O2', type=float, default=dflts.chem_H2O2, help='H2O2 volume concentration [1]')
