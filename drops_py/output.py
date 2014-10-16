@@ -73,7 +73,7 @@ class output_lgr:
       units_sound["conc_" + str(sp)] = "TODO" 
 
     for var in variables_sound:
-      print "var sound", var
+      #print "var sound", var
       #pdb.set_trace()
       setattr(self, var, self.hdf_sound.create_dataset(var, (self.time.size,), dtype='f')) 
       getattr(self, var).dims.create_scale(self.hdf_sound["time"], "time")

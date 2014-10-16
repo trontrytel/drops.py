@@ -97,7 +97,8 @@ rhs = rhs_lgrngn.rhs_lgrngn(
   args.sd_conc, 
   { 
     args.kappa : lognormal(args.n_tot, args.meanr, args.gstdv)
-  }
+  },
+  cloud_rng = (args.cloud_r_min, args.cloud_r_max)
 # TODO!!!
 #,
 #  {

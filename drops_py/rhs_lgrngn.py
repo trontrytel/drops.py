@@ -5,11 +5,14 @@ import h5py
 class rhs_lgrngn:
 
   # ctor
-  def __init__(self, outdir, dt, sd_conc, dry_distros, chem_gas = None):
+  def __init__(self, outdir, dt, sd_conc, dry_distros, chem_gas = None, cloud_rng = None):
     opts_init = libcl.lgrngn.opts_init_t()
     opts_init.sd_conc_mean = sd_conc
     opts_init.dry_distros = dry_distros
     opts_init.dt = dt
+
+    # TODO: not here
+    self.cloud_rng = cloud_rng
 
     backend = libcl.lgrngn.backend_t.serial #TODO: as an option
     self.prtcls = libcl.lgrngn.factory(backend, opts_init)
