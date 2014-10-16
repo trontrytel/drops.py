@@ -29,7 +29,7 @@ string ( REGEX REPLACE "^${PYTHON_PREFIX}/" ""
 )
 
 install( 
-  DIRECTORY src/
+  DIRECTORY drops_py/
   DESTINATION "${PYTHON_SITE_DIR}/drops_py"
-  PATTERN "src/*.py"
+  PATTERN "drops_py/*.py"
 )
