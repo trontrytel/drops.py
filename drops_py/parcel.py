@@ -1,27 +1,18 @@
 import libcloudphxx.common as libcom 
 import analytical_equations as eq
 import numpy as np
-import output
-
 
 # p_d, th_d, r_v should contain initial values
 #                and are overwritten!
-def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
+def parcel(p_d, th_d, r_v, w, nt, outfreq, out, rhs):
 
   # t=0 stuff
   rhod = eq.rhod_fun(p_d, th_d)
   rhs.init(rhod, th_d, r_v)
 
-  # preparing output
-  time_out = rhs.dt * np.arange(0, nt+1, outfreq) # nt+1 to include nt in the time_out
-  out_file = output.output_lgr(rhs.outdir, time_out, cloud_rng = rhs.cloud_rng) #TODO: this chould be done within rhs_lgrngn? so that parcel.py does not contain anything specific to super-droplets
   # saving initial values
-  out_file.diag(rhs.prtcls, rhod, th_d, r_v, 0)
+  out.diag(rhs.prtcls, rhod, th_d, r_v, 0)
 
-  # placing a quick-look gnuplot file in the output directory
-  import os, shutil
-  shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', rhs.outdir + '/quicklook.gpi')
-  
   # Euler-like integration
   for it in range(nt):
     #TODO: update process name :)
@@ -42,5 +33,5 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, rhs):
 
     # doing diagnostics / output
     if ((it+1)  % outfreq == 0):
-      out_file.diag(rhs.prtcls, rhod, th_d, r_v, (it+1) * rhs.dt) 
+      out.diag(rhs.prtcls, rhod, th_d, r_v, (it+1) * rhs.dt) 
 

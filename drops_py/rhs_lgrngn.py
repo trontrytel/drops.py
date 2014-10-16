@@ -5,7 +5,7 @@ import h5py
 class rhs_lgrngn:
 
   # ctor
-  def __init__(self, outdir, dt, sd_conc, dry_distros, chem_gas = None, cloud_rng = None):
+  def __init__(self, dt, sd_conc, dry_distros, chem_gas = None, cloud_rng = None):
     opts_init = libcl.lgrngn.opts_init_t()
     opts_init.sd_conc_mean = sd_conc
     opts_init.dry_distros = dry_distros
@@ -30,8 +30,6 @@ class rhs_lgrngn:
       self.opts.chem_gas = chem_gas
 
     # TODO: what's below should not be here...
-    # TODO: outfreq
-    self.outdir = outdir
     self.dt = dt
 
 

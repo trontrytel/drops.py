@@ -2,7 +2,7 @@
 
 # note: before "make install" it uses local one (that's why the directory is named drops_py),
 #       afterwards - the system one is used (the one installed by "make install"
-from drops_py import rhs_lgrngn, parcel
+from drops_py import rhs_lgrngn, parcel, output
 from drops_py.defaults import defaults
 from drops_py.defaults_Ghan_et_al_1998 import defaults_Ghan_et_al_1998
 from drops_py.defaults_Kreidenweis_et_al_2003 import defaults_Kreidenweis_et_al_2003
@@ -92,7 +92,6 @@ class lognormal:
 
 # performing the simulation
 rhs = rhs_lgrngn.rhs_lgrngn(
-  args.outdir, 
   args.dt, 
   args.sd_conc, 
   { 
@@ -107,7 +106,12 @@ rhs = rhs_lgrngn.rhs_lgrngn(
 #    libcl.lgrngn.chem_species_t.H2O2 : args.chem_H2O2
 #  }
 )
-parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, rhs)
+out = output.output_lgr(
+  args.outdir, 
+  args.dt * np.arange(0, args.nt+1, args.outfreq), # nt+1 to include nt in the time_out, 
+  cloud_rng = (args.cloud_r_min, args.cloud_r_max)
+) 
+parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, out, rhs)
 
 # outputting a setup.gpi file
 out = open(args.outdir + '/setup.gpi', mode='w')
