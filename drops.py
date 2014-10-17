@@ -88,6 +88,15 @@ class lognormal:
       -pow((lnr - math.log(self.meanr)), 2) / 2 / pow(math.log(self.stdev),2)
     ) / math.log(self.stdev) / math.sqrt(2*math.pi);
 
+chem_gas = None
+if args.chem_SO2 + args.chem_O3 + args.chem_H2O2 > 0:
+  chem_gas = {
+    libcl.lgrngn.chem_species_t.SO2  : args.chem_SO2,
+    libcl.lgrngn.chem_species_t.O3   : args.chem_O3,
+    libcl.lgrngn.chem_species_t.H2O2 : args.chem_H2O2
+  }
+
+
 # performing the simulation
 rhs = rhs_lgrngn.rhs_lgrngn(
   args.outdir, 
@@ -95,14 +104,8 @@ rhs = rhs_lgrngn.rhs_lgrngn(
   args.sd_conc, 
   { 
     args.kappa : lognormal(args.n_tot, args.meanr, args.gstdv)
-  }
-# TODO!!!
-#,
-#  {
-#    libcl.lgrngn.chem_species_t.SO2  : args.chem_SO2,
-#    libcl.lgrngn.chem_species_t.O3   : args.chem_O3,
-#    libcl.lgrngn.chem_species_t.H2O2 : args.chem_H2O2
-#  }
+  },
+  chem_gas = chem_gas
 )
 parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, rhs)
 
