@@ -19,10 +19,10 @@ class output_lgr:
       pass
     self.time = time_out
     self.mom_diag = mom_diag 
-    self.chem_sp = chem_sp
+    self.chem_sp  = chem_sp
     self.bins_dry = bins_dry
     self.bins_wet = bins_wet
-    self.hdf_spec = h5py.File(self.outdir_hdf + "spec_drywet.hdf", mode='w')
+    self.hdf_spec  = h5py.File(self.outdir_hdf + "spec_drywet.hdf", mode='w')
     self.hdf_sound = h5py.File(self.outdir_hdf + "sounding.hdf", mode='w')
     self.out_snd = open(outdir + "/sounding.txt", mode='w')
     self.out_dry = open(outdir + "/spec_dry.txt", mode='w')
@@ -34,12 +34,12 @@ class output_lgr:
     self.hdf_spec["bins_dry"] = self.bins_dry[:-1]
     self.hdf_spec["bins_wet"] = self.bins_wet[:-1]
   
-  # creating hdf varibales
+    # creating hdf varibales
     variables_spec = ['dry_number', 'wet_number']
-    # concentratio per size of dry particles
+    # concentration per size of dry particles
     self.dry_number = self.hdf_spec.create_dataset("dry_number",
                                  (self.time.size, self.bins_dry.size - 1), dtype='f')
-    # concentratio per size of wet particles
+    # concentration per size of wet particles
     self.wet_number = self.hdf_spec.create_dataset("wet_number",
                                  (self.time.size, self.bins_wet.size - 1), dtype='f')
 
@@ -80,8 +80,8 @@ class output_lgr:
       getattr(self, var).attrs["Units"] = units_sound[var]
 
 
-    # description of the txt files #TODO removing chem?
-    self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\tS_VI [kg/kg]\tH [kg/kg]\tSO2 [kg/kg]\n")
+    # description of the txt files
+    self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\n")
     self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
     self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
 
@@ -132,7 +132,6 @@ class output_lgr:
     prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
     for sp in self.chem_sp:
       prtcls.diag_chem(getattr(libcl.lgrngn.chem_species_t, sp)) 
-      self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
       getattr(self, "conc_" + sp)[it_out] =  np.frombuffer(prtcls.outbuf())
  
     self.out_snd.write(u"\n")

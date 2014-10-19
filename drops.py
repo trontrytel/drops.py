@@ -96,7 +96,6 @@ if args.chem_SO2 + args.chem_O3 + args.chem_H2O2 > 0:
     libcl.lgrngn.chem_species_t.H2O2 : args.chem_H2O2
   }
 
-
 # performing the simulation
 rhs = rhs_lgrngn.rhs_lgrngn(
   args.outdir, 
