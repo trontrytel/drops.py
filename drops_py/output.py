@@ -132,7 +132,6 @@ class output_lgr:
     prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
     for sp in self.chem_sp:
       prtcls.diag_chem(getattr(libcl.lgrngn.chem_species_t, sp)) 
-      #self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
       getattr(self, "conc_" + sp)[it_out] =  np.frombuffer(prtcls.outbuf())
  
     self.out_snd.write(u"\n")
