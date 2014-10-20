@@ -63,6 +63,7 @@ prsr_lgr.add_argument('--meanr',     type=float, required=(dflts.meanr   is None
 prsr_lgr.add_argument('--gstdv',     type=float, required=(dflts.gstdv   is None), default=dflts.gstdv,   help='aerosol geometric standard deviation [1]')
 prsr_lgr.add_argument('--cloud_r_min', type=float, required=(dflts.cloud_r_min is None), default=dflts.cloud_r_min, help='minimum radius of cloud droplet range [m]')
 prsr_lgr.add_argument('--cloud_r_max', type=float, required=(dflts.cloud_r_max is None), default=dflts.cloud_r_max, help='maximum radius of cloud droplet range [m]')
+prsr_lgr.add_argument('--cloud_n_bin', type=int, required=(dflts.cloud_n_bin is None), default=dflts.cloud_n_bin, help='number of bins in the cloud droplet range [1]')
 prsr_lgr.add_argument('--chem_SO2',  type=float, default=dflts.chem_SO2,  help='SO2 volume concentration [1]')
 prsr_lgr.add_argument('--chem_O3',   type=float, default=dflts.chem_O3,   help='O3 volume concentration [1]')
 prsr_lgr.add_argument('--chem_H2O2', type=float, default=dflts.chem_H2O2, help='H2O2 volume concentration [1]')
@@ -97,7 +98,6 @@ rhs = rhs_lgrngn.rhs_lgrngn(
   { 
     args.kappa : lognormal(args.n_tot, args.meanr, args.gstdv)
   },
-  cloud_rng = (args.cloud_r_min, args.cloud_r_max)
 # TODO!!!
 #,
 #  {
@@ -109,7 +109,8 @@ rhs = rhs_lgrngn.rhs_lgrngn(
 out = output.output_lgr(
   args.outdir, 
   args.dt * np.arange(0, args.nt+1, args.outfreq), # nt+1 to include nt in the time_out, 
-  cloud_rng = (args.cloud_r_min, args.cloud_r_max)
+  cloud_rng = (args.cloud_r_min, args.cloud_r_max),
+  cloud_nbins = args.cloud_n_bin
 ) 
 parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, out, rhs)
 
