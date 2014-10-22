@@ -114,7 +114,7 @@ class output_lgr:
     
     # outputting sounding.txt and sounding.hdf
     self.out_snd.write(u"%g" % (rhod))
-    self.out_snd.write(u"\t%g" % (th_d))
+    self.out_snd.write(u"\t%.9g" % (th_d))
     self.out_snd.write(u"\t%g" % (r_v))
     # outputting to hdf 
     self.rhod[it_out] = rhod
