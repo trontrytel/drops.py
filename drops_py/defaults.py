@@ -15,7 +15,7 @@ class defaults:
     reversed(inspect.getargspec(output_lgr.__init__)[0]), 
     reversed(inspect.getargspec(output_lgr.__init__)[3]))
   )
-  cloud_r_min, cloud_r_max = defargs["cloud_rng"][0:2]
+  cloud_r_min, cloud_r_max = defargs["cloud_rng"]
   cloud_n_bin = defargs["cloud_nbins"]
  
   sd_conc = None

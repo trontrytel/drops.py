@@ -33,7 +33,8 @@ class output_lgr:
     self.out_cld = open(outdir + "/spec_cld.txt", mode='w')
 
     # defining cld bin locations from cloud_rng and cloud_nbins (linear!)
-    self.bins_cld = cloud_rng[0] + np.arange(cloud_nbins) * (cloud_rng[1] - cloud_rng[0]) / cloud_nbins
+    self.bins_cld = np.linspace(cloud_rng[0], cloud_rng[1], cloud_nbins+1, 
+                                endpoint=True)
 
     # creating data sets that will be used as scales in spec_drywet.hdf               
     self.hdf_spec["time"] = out_time
@@ -42,7 +43,7 @@ class output_lgr:
     self.hdf_spec["bins_cld"] = self.bins_cld[:-1]
   
     # creating hdf varibales
-    variables_spec = ['dry_number', 'wet_number']
+    variables_spec = ['dry_number', 'wet_number', "cld_number"]
     # concentration per size of dry particles
     self.dry_number = self.hdf_spec.create_dataset("dry_number",
                            (out_time.size, self.bins_dry.size - 1), dtype='f')
@@ -115,32 +116,21 @@ class output_lgr:
         out.write(u"%g\t%g\n" % (x, y))
       out.write(u"\n\n") # gnuplot treats "\n\n" as dataset separator (plot ... index n)
 
-    # outputting spec_dry.txt and dry_n to hdf file
-    bins = np.empty(self.bins_dry.size - 1)
-    for i in range(0, bins.size) :
-      prtcls.diag_dry_rng(self.bins_dry[i], self.bins_dry[i+1])
-      prtcls.diag_dry_mom(0)
-      bins[i] = np.frombuffer(prtcls.outbuf())
-    save(self.out_dry, self.bins_dry[0:-1], bins)
-    self.dry_number[it_out,:] = bins
+    def bins_save(type):
+      bins = np.empty(getattr(self, 'bins_' + type).size - 1)
+      for i in range(bins.size) :
+        if (type in ['cld', 'wet']):
+          prtcls.diag_wet_rng(getattr(self, 'bins_' + type)[i], getattr(self, 'bins_' + type)[i+1])
+          prtcls.diag_wet_mom(0)
+        elif (type in ['dry']):
+          prtcls.diag_dry_rng(getattr(self, 'bins_' + type)[i], getattr(self, 'bins_' + type)[i+1])
+          prtcls.diag_dry_mom(0)
+        bins[i] = np.frombuffer(prtcls.outbuf())
+      save(getattr(self, 'out_' + type), getattr(self, 'bins_' + type)[0:-1], bins)
+      getattr(self, type + '_number')[it_out,:] = bins
 
-    # outputting spec_wet.txt and wet_n to hdf file
-    bins = np.empty(self.bins_wet.size - 1)
-    for i in range(0, bins.size) :
-      prtcls.diag_wet_rng(self.bins_wet[i], self.bins_wet[i+1])
-      prtcls.diag_wet_mom(0)
-      bins[i] = np.frombuffer(prtcls.outbuf())      
-    save(self.out_wet, self.bins_wet[0:-1], bins)
-    self.wet_number[it_out,:] = bins
-    
-    # outputting spec_cld.txt and wet_n to hdf file
-    bins = np.empty(self.bins_cld.size - 1)
-    for i in range(0, bins.size) :
-      prtcls.diag_wet_rng(self.bins_cld[i], self.bins_cld[i+1])
-      prtcls.diag_wet_mom(0)
-      bins[i] = np.frombuffer(prtcls.outbuf())      
-    save(self.out_cld, self.bins_cld[0:-1], bins)
-    self.cld_number[it_out,:] = bins
+    for type in ["cld", "wet", "dry"]:
+      bins_save(type)
     
     # outputting sounding.txt and sounding.hdf
     self.out_snd.write(u"%g" % (rhod))
