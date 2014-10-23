@@ -5,7 +5,8 @@ import libcloudphxx as libcl
 
 class output_lgr:
 
-  def __init__(self, outdir, time_out, mom_diag=range(4), chem_sp = ["S_VI", "H", "SO2"],
+  def __init__(self, outdir, out_time, mom_diag=range(4), chem_sp = ["S_VI", "H", "SO2"],
+               cloud_rng = (.5e-6, 25e-6),
                bins_dry = 1e-6 * pow(10, -3 + np.arange(40) * .1),
                bins_wet = 1e-6 * pow(10, -3 + np.arange(25) * .2)):
     self.outdir_hdf = outdir + "/hdf_output/"
@@ -17,9 +18,10 @@ class output_lgr:
       os.mkdir(self.outdir_hdf)
     except OSError:
       pass
-    self.time = time_out
+    self.out_time = out_time
     self.mom_diag = mom_diag 
-    self.chem_sp  = chem_sp
+    self.chem_sp = chem_sp
+    self.cloud_rng = cloud_rng
     self.bins_dry = bins_dry
     self.bins_wet = bins_wet
     self.hdf_spec  = h5py.File(self.outdir_hdf + "spec_drywet.hdf", mode='w')
@@ -30,7 +32,7 @@ class output_lgr:
 
 
     # creating data sets that will be used as scales in spec_drywet.hdf               
-    self.hdf_spec["time"] = self.time
+    self.hdf_spec["time"] = out_time
     self.hdf_spec["bins_dry"] = self.bins_dry[:-1]
     self.hdf_spec["bins_wet"] = self.bins_wet[:-1]
   
@@ -38,10 +40,10 @@ class output_lgr:
     variables_spec = ['dry_number', 'wet_number']
     # concentration per size of dry particles
     self.dry_number = self.hdf_spec.create_dataset("dry_number",
-                                 (self.time.size, self.bins_dry.size - 1), dtype='f')
+                           (out_time.size, self.bins_dry.size - 1), dtype='f')
     # concentration per size of wet particles
     self.wet_number = self.hdf_spec.create_dataset("wet_number",
-                                 (self.time.size, self.bins_wet.size - 1), dtype='f')
+                                 (out_time.size, self.bins_wet.size - 1), dtype='f')
 
     # attaching scales, units etc. to the hdf variables
     self.dry_number.dims.create_scale(self.hdf_spec["bins_dry"], "dry_radius")
@@ -57,7 +59,8 @@ class output_lgr:
 
 
     # creating data sets that will be used as scales in sounding.hdf
-    self.hdf_sound["time"] = self.time
+    self.hdf_sound["time"] = out_time
+
 
     # creating hdf varibales and attaching scales, units etc.  
     # sounding: dry density, dry pot. temp., water vapour mix. rat.
@@ -71,9 +74,9 @@ class output_lgr:
       units_sound["conc_" + str(sp)] = "TODO" 
 
     for var in variables_sound:
-      print "var sound", var
+      #print "var sound", var
       #pdb.set_trace()
-      setattr(self, var, self.hdf_sound.create_dataset(var, (self.time.size,), dtype='f')) 
+      setattr(self, var, self.hdf_sound.create_dataset(var, (out_time.size,), dtype='f')) 
       getattr(self, var).dims.create_scale(self.hdf_sound["time"], "time")
       getattr(self, var).dims[0].attach_scale(self.hdf_sound["time"])
       getattr(self, var).dims[0].label = 's'
@@ -84,11 +87,16 @@ class output_lgr:
     self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\n")
     self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
     self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
+  
+  
+    # placing a quick-look gnuplot file in the output directory
+    import shutil
+    shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', outdir + '/quicklook.gpi')
 
 
   def diag(self, prtcls, rhod, th_d, r_v, itime):
     # index of itime in the array self.time
-    it_out = self.time.searchsorted(itime)
+    it_out = self.out_time.searchsorted(itime)
 
     def save(out, xx, yy):
       for x, y in zip(xx, yy):
@@ -122,7 +130,7 @@ class output_lgr:
     self.rv[it_out] =  r_v
 
     ## cloud water 
-    prtcls.diag_wet_rng(.5e-6, 25e-6) #TODO should be an argument in __inint__?
+    prtcls.diag_wet_rng(self.cloud_rng[0], self.cloud_rng[1])
     for k in self.mom_diag: 
       prtcls.diag_wet_mom(k)
       self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
