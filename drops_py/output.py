@@ -60,10 +60,10 @@ class output_lgr:
     self.hdf_sound["time"] = self.time
 
     # creating hdf varibales and attaching scales, units etc.  
-    # sounding: dry density, dry pot. temp., water vapour mix. rat.
-    variables_sound = ["rhod", "thd", "rv"]
-    units_sound = {"rhod":"kg/m^3", "thd":"K", "rv":"kg/kg"} 
-    for i in self.mom_diag:
+    # sounding: dry density, dry pot. temp., water vapour mix. rat., partial pressure of SO2
+    variables_sound = ["rhod", "thd", "rv", "p_SO2"]
+    units_sound = {"rhod":"kg/m^3", "thd":"K", "rv":"kg/kg", "p_SO2":"Pa?"} 
+    for i in self.mom_diag:                                               #TODO check units
       variables_sound.append("mom_" + str(i))
       units_sound["mom_" + str(i)] = "m^" + str(i) #TODO is it ok??
     for sp in self.chem_sp:
@@ -86,7 +86,7 @@ class output_lgr:
     self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
 
 
-  def diag(self, prtcls, rhod, th_d, r_v, itime):
+  def diag(self, rhs, rhod, th_d, r_v, itime):
     # index of itime in the array self.time
     it_out = self.time.searchsorted(itime)
 
@@ -97,18 +97,18 @@ class output_lgr:
     # outputting spec_dry.txt and dry_n to hdf file
     bins = np.empty(self.bins_dry.size - 1)
     for i in range(0, bins.size) :
-      prtcls.diag_dry_rng(self.bins_dry[i], self.bins_dry[i+1])
-      prtcls.diag_dry_mom(0)
-      bins[i] = np.frombuffer(prtcls.outbuf())
+      rhs.prtcls.diag_dry_rng(self.bins_dry[i], self.bins_dry[i+1])
+      rhs.prtcls.diag_dry_mom(0)
+      bins[i] = np.frombuffer(rhs.prtcls.outbuf())
     save(self.out_dry, self.bins_dry[0:-1], bins)
     self.dry_number[it_out,:] = bins
 
     # outputting spec_wet.txt and wet_n to hdf file
     bins = np.empty(self.bins_wet.size - 1)
     for i in range(0, bins.size) :
-      prtcls.diag_wet_rng(self.bins_wet[i], self.bins_wet[i+1])
-      prtcls.diag_wet_mom(0)
-      bins[i] = np.frombuffer(prtcls.outbuf())      
+      rhs.prtcls.diag_wet_rng(self.bins_wet[i], self.bins_wet[i+1])
+      rhs.prtcls.diag_wet_mom(0)
+      bins[i] = np.frombuffer(rhs.prtcls.outbuf())      
     save(self.out_wet, self.bins_wet[0:-1], bins)
     self.wet_number[it_out,:] = bins
     
@@ -120,19 +120,21 @@ class output_lgr:
     self.rhod[it_out] = rhod
     self.thd[it_out] = th_d
     self.rv[it_out] =  r_v
+#    self.p_SO2[it_out] = self.opts.chem_gas[libcl.lgrngn.chem_species_t.SO2] 
+    print  rhs.opts.chem_gas[libcl.lgrngn.chem_species_t.SO2] 
 
     ## cloud water 
-    prtcls.diag_wet_rng(.5e-6, 25e-6) #TODO should be an argument in __inint__?
+    rhs.prtcls.diag_wet_rng(.5e-6, 25e-6) #TODO should be an argument in __inint__?
     for k in self.mom_diag: 
-      prtcls.diag_wet_mom(k)
-      self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
-      getattr(self,'mom_' + str(k))[it_out] = np.frombuffer(prtcls.outbuf())
+      rhs.prtcls.diag_wet_mom(k)
+      self.out_snd.write(u"\t%g" % (np.frombuffer(rhs.prtcls.outbuf())))
+      getattr(self,'mom_' + str(k))[it_out] = np.frombuffer(rhs.prtcls.outbuf())
 
     ## chem stuff 
-    prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
+    rhs.prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
     for sp in self.chem_sp:
-      prtcls.diag_chem(getattr(libcl.lgrngn.chem_species_t, sp)) 
-      getattr(self, "conc_" + sp)[it_out] =  np.frombuffer(prtcls.outbuf())
+      rhs.prtcls.diag_chem(getattr(libcl.lgrngn.chem_species_t, sp)) 
+      getattr(self, "conc_" + sp)[it_out] =  np.frombuffer(rhs.prtcls.outbuf())
  
     self.out_snd.write(u"\n")
 
