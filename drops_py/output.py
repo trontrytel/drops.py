@@ -7,6 +7,7 @@ class output_lgr:
 
   def __init__(self, outdir, out_time, mom_diag=range(4), chem_sp = ["S_VI", "H", "SO2"],
                cloud_rng = (.5e-6, 25e-6),
+               cloud_nbins = 49,
                bins_dry = 1e-6 * pow(10, -3 + np.arange(40) * .1),
                bins_wet = 1e-6 * pow(10, -3 + np.arange(25) * .2)):
     self.outdir_hdf = outdir + "/hdf_output/"
@@ -29,12 +30,16 @@ class output_lgr:
     self.out_snd = open(outdir + "/sounding.txt", mode='w')
     self.out_dry = open(outdir + "/spec_dry.txt", mode='w')
     self.out_wet = open(outdir + "/spec_wet.txt", mode='w')
+    self.out_cld = open(outdir + "/spec_cld.txt", mode='w')
 
+    # defining cld bin locations from cloud_rng and cloud_nbins (linear!)
+    self.bins_cld = cloud_rng[0] + np.arange(cloud_nbins) * (cloud_rng[1] - cloud_rng[0]) / cloud_nbins
 
     # creating data sets that will be used as scales in spec_drywet.hdf               
     self.hdf_spec["time"] = out_time
     self.hdf_spec["bins_dry"] = self.bins_dry[:-1]
     self.hdf_spec["bins_wet"] = self.bins_wet[:-1]
+    self.hdf_spec["bins_cld"] = self.bins_cld[:-1]
   
     # creating hdf varibales
     variables_spec = ['dry_number', 'wet_number']
@@ -44,12 +49,18 @@ class output_lgr:
     # concentration per size of wet particles
     self.wet_number = self.hdf_spec.create_dataset("wet_number",
                                  (out_time.size, self.bins_wet.size - 1), dtype='f')
+    # concentratio per size of wet particles
+    self.cld_number = self.hdf_spec.create_dataset("cld_number",
+                                 (out_time.size, self.bins_cld.size - 1), dtype='f')
 
     # attaching scales, units etc. to the hdf variables
     self.dry_number.dims.create_scale(self.hdf_spec["bins_dry"], "dry_radius")
     self.dry_number.dims[1].attach_scale(self.hdf_spec["bins_dry"])
     self.wet_number.dims.create_scale(self.hdf_spec["bins_wet"], "wet_radius")
     self.wet_number.dims[1].attach_scale(self.hdf_spec["bins_wet"])
+    self.cld_number.dims.create_scale(self.hdf_spec["bins_cld"], "cld_radius")
+    self.cld_number.dims[1].attach_scale(self.hdf_spec["bins_cld"])
+
     for var in variables_spec:
       getattr(self,var).dims.create_scale(self.hdf_spec["time"], "time")
       getattr(self,var).dims[0].attach_scale(self.hdf_spec["time"])
@@ -87,6 +98,7 @@ class output_lgr:
     self.out_snd.write(u"#rhod [kg/m3]\tth_d [K] (theta dry!)\tr_v [kg/kg] (mixing ratio)\tM0 [TODO]\tM1 [TODO]\tM2 [TODO]\tM3 [TODO]\n")
     self.out_dry.write(u"#r_d [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
     self.out_wet.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
+    self.out_cld.write(u"#r_w [m] (left bin edge)\tn [kg-1] (per mass of dry air)\n")
   
   
     # placing a quick-look gnuplot file in the output directory
@@ -102,6 +114,7 @@ class output_lgr:
       for x, y in zip(xx, yy):
         out.write(u"%g\t%g\n" % (x, y))
       out.write(u"\n\n") # gnuplot treats "\n\n" as dataset separator (plot ... index n)
+
     # outputting spec_dry.txt and dry_n to hdf file
     bins = np.empty(self.bins_dry.size - 1)
     for i in range(0, bins.size) :
@@ -119,6 +132,15 @@ class output_lgr:
       bins[i] = np.frombuffer(prtcls.outbuf())      
     save(self.out_wet, self.bins_wet[0:-1], bins)
     self.wet_number[it_out,:] = bins
+    
+    # outputting spec_cld.txt and wet_n to hdf file
+    bins = np.empty(self.bins_cld.size - 1)
+    for i in range(0, bins.size) :
+      prtcls.diag_wet_rng(self.bins_cld[i], self.bins_cld[i+1])
+      prtcls.diag_wet_mom(0)
+      bins[i] = np.frombuffer(prtcls.outbuf())      
+    save(self.out_cld, self.bins_cld[0:-1], bins)
+    self.cld_number[it_out,:] = bins
     
     # outputting sounding.txt and sounding.hdf
     self.out_snd.write(u"%g" % (rhod))
