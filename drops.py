@@ -2,7 +2,7 @@
 
 # note: before "make install" it uses local one (that's why the directory is named drops_py),
 #       afterwards - the system one is used (the one installed by "make install"
-from drops_py import rhs_lgrngn, parcel
+from drops_py import rhs_lgrngn, parcel, output
 from drops_py.defaults import defaults
 from drops_py.defaults_Ghan_et_al_1998 import defaults_Ghan_et_al_1998
 from drops_py.defaults_Kreidenweis_et_al_2003 import defaults_Kreidenweis_et_al_2003
@@ -57,6 +57,8 @@ prsr_lgr.add_argument('--kappa',     type=float, required=(dflts.kappa   is None
 prsr_lgr.add_argument('--n_tot',     type=float, required=(dflts.n_tot   is None), default=dflts.n_tot,   help='aerosol concentration @STP [m-3]')
 prsr_lgr.add_argument('--meanr',     type=float, required=(dflts.meanr   is None), default=dflts.meanr,   help='aerosol mean dry radius [m]')
 prsr_lgr.add_argument('--gstdv',     type=float, required=(dflts.gstdv   is None), default=dflts.gstdv,   help='aerosol geometric standard deviation [1]')
+prsr_lgr.add_argument('--cloud_r_min', type=float, required=(dflts.cloud_r_min is None), default=dflts.cloud_r_min, help='minimum radius of cloud droplet range [m]')
+prsr_lgr.add_argument('--cloud_r_max', type=float, required=(dflts.cloud_r_max is None), default=dflts.cloud_r_max, help='maximum radius of cloud droplet range [m]')
 prsr_lgr.add_argument('--chem_SO2',  type=float, default=dflts.chem_SO2,  help='SO2 volume concentration [1]')
 prsr_lgr.add_argument('--chem_O3',   type=float, default=dflts.chem_O3,   help='O3 volume concentration [1]')
 prsr_lgr.add_argument('--chem_H2O2', type=float, default=dflts.chem_H2O2, help='H2O2 volume concentration [1]')
@@ -94,15 +96,20 @@ if args.chem_SO2 + args.chem_O3 + args.chem_H2O2 > 0:
 
 # performing the simulation
 rhs = rhs_lgrngn.rhs_lgrngn(
-  args.outdir, 
   args.dt, 
   args.sd_conc, 
   { 
     args.kappa : lognormal(args.n_tot, args.meanr, args.gstdv)
   },
-  chem_gas = chem_gas
+  chem_gas = chem_gas,
+  cloud_rng = (args.cloud_r_min, args.cloud_r_max)
 )
-parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, rhs)
+out = output.output_lgr(
+  args.outdir, 
+  args.dt * np.arange(0, args.nt+1, args.outfreq), # nt+1 to include nt in the time_out, 
+  cloud_rng = (args.cloud_r_min, args.cloud_r_max)
+) 
+parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, out, rhs)
 
 # outputting a setup.gpi file
 out = open(args.outdir + '/setup.gpi', mode='w')
