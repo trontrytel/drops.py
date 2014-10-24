@@ -11,7 +11,7 @@ a parcel model based on libcloudph++
 
   $ cmake ..
 
-  $ make test
+  $ make test (TODO)
 
   $ sudo make install
 
