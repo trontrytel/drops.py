@@ -110,10 +110,16 @@ out = output.output_lgr(
   cloud_rng = (args.cloud_r_min, args.cloud_r_max),
   cloud_nbins = args.cloud_n_bin
 ) 
-parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, out, rhs)
+stats = {}
+parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, out, rhs, stats=stats)
 
 # outputting a setup.gpi file
 out = open(args.outdir + '/setup.gpi', mode='w')
 for key, val in vars(args).iteritems():
   if key != "outdir" and key != "defaults":
     out.write(u"%s = %g\n" % (key, float(val)))
+
+# outputting a stats.gpi file
+out = open(args.outdir + '/stats.gpi', mode='w')
+for key, val in stats.iteritems():
+  out.write(u"%s = %g\n" % (key, float(val)))
