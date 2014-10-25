@@ -15,7 +15,7 @@ clmn_SO2 = 10
 
 set key below maxcols 1
 
-set multiplot layout 1,3
+set multiplot layout 1,2
   set title 'sounding'
   set xlabel 'mixing ratio [g/kg]'
   set x2tics
@@ -101,17 +101,6 @@ set multiplot layout 1,3
     \
     'sounding.txt' using (column(clmn_m3)/column(clmn_m2)*1e6):($0*outfreq*dt) \
       title 'effective radius (.5-25 μm)' \
-      with lines lt 0 lw 3
+      with lines lt 1 lw 3
 
-  set title 'chem stuff'
-  set nologscale
-  unset arrow
-  set x2label 'TODO'
-  set xlabel 'mixing ratio (mass per mass of dry air)'
-  set xrange [*:*]
-  set x2range [*:*]
-  plot \
-    'sounding.txt' using (column(clmn_SO2)):($0*outfreq*dt) title 'mixing ratio of absorbed SO_2 [kg/kg]' with lines, \
-    0 title 'TODO', \
-    0 title 'TODO'
 unset multiplot
