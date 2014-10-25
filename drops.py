@@ -54,9 +54,9 @@ prsr.add_argument('--nt',        type=int,   required=(dflts.nt is None), defaul
 prsr_lgr = sprsr.add_parser('lgrngn')
 prsr_lgr.add_argument('--sd_conc',   type=float, required=(dflts.sd_conc is None), default=dflts.sd_conc, help='number of super droplets')
 prsr_lgr.add_argument('--kappa',     type=float, required=(dflts.kappa   is None), default=dflts.kappa,   help='aerosol hygroscopicity parameter [1]')
-prsr_lgr.add_argument('--n_tot',     type=float, required=(dflts.n_tot   is None), default=dflts.n_tot,   help='aerosol concentration @STP [m-3]')
-prsr_lgr.add_argument('--meanr',     type=float, required=(dflts.meanr   is None), default=dflts.meanr,   help='aerosol mean dry radius [m]')
-prsr_lgr.add_argument('--gstdv',     type=float, required=(dflts.gstdv   is None), default=dflts.gstdv,   help='aerosol geometric standard deviation [1]')
+prsr_lgr.add_argument('--n_tot',     type=float, required=(dflts.n_tot   is None), default=dflts.n_tot,   help='aerosol concentration @STP [m-3]',         nargs='+')
+prsr_lgr.add_argument('--meanr',     type=float, required=(dflts.meanr   is None), default=dflts.meanr,   help='aerosol mean dry radius [m]',              nargs='+')
+prsr_lgr.add_argument('--gstdv',     type=float, required=(dflts.gstdv   is None), default=dflts.gstdv,   help='aerosol geometric standard deviation [1]', nargs='+')
 prsr_lgr.add_argument('--cloud_r_min', type=float, required=(dflts.cloud_r_min is None), default=dflts.cloud_r_min, help='minimum radius of cloud droplet range [m]')
 prsr_lgr.add_argument('--cloud_r_max', type=float, required=(dflts.cloud_r_max is None), default=dflts.cloud_r_max, help='maximum radius of cloud droplet range [m]')
 prsr_lgr.add_argument('--cloud_n_bin', type=int, required=(dflts.cloud_n_bin is None), default=dflts.cloud_n_bin, help='number of bins in the cloud droplet range [1]')
@@ -78,14 +78,18 @@ th_d = args.T * pow(libcom.p_1000 / p_d, libcom.R_d / libcom.c_pd)
 
 class lognormal:
   def __init__(self, n_tot, meanr, gstdv):
+    assert len(n_tot) == len(meanr) == len(gstdv)
     self.meanr = meanr
     self.stdev = gstdv
     self.n_tot = n_tot
  
   def __call__(self, lnr):
-    return self.n_tot * math.exp(
-      -pow((lnr - math.log(self.meanr)), 2) / 2 / pow(math.log(self.stdev),2)
-    ) / math.log(self.stdev) / math.sqrt(2*math.pi);
+    total = 0.
+    for m in range(0, len(self.n_tot)):
+      total += self.n_tot[m] * math.exp(
+	-pow((lnr - math.log(self.meanr[m])), 2) / 2 / pow(math.log(self.stdev[m]),2)
+      ) / math.log(self.stdev[m]) / math.sqrt(2*math.pi);
+    return total
 
 chem_gas = None
 if args.chem_SO2 + args.chem_O3 + args.chem_H2O2 > 0:
