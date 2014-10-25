@@ -40,22 +40,18 @@ sprsr = prsr.add_subparsers()
 
 ## common options
 prsr.add_argument('--outdir',                required=True,                                 help='output directory')
+prsr.add_argument('--outfreq',   type=int,   required=True,                                 help='output frequency (every outfreq timesteps)')
 
-# lgrngn subparser
-prsr_lgr = sprsr.add_parser('lgrngn')
+prsr.add_argument('--T',         type=float, required=(dflts.T  is None), default=dflts.T,  help='initial temperature [K]')
+prsr.add_argument('--p',         type=float, required=(dflts.p  is None), default=dflts.p,  help='initial pressure [Pa]')
+prsr.add_argument('--RH',        type=float, required=(dflts.RH is None), default=dflts.RH, help='initial relative humidity [1]')
+prsr.add_argument('--w',         type=float, required=(dflts.w  is None), default=dflts.w,  help='vertical velocity [m/s]')
 
-## common options (TODO - breaks compatibility as these options must go before "lgrngn")
-prsr_lgr.add_argument('--outfreq',   type=int,   required=True, help='output frequency (every outfreq timesteps)')
-
-prsr_lgr.add_argument('--T',         type=float, required=(dflts.T  is None), default=dflts.T,  help='initial temperature [K]')
-prsr_lgr.add_argument('--p',         type=float, required=(dflts.p  is None), default=dflts.p,  help='initial pressure [Pa]')
-prsr_lgr.add_argument('--RH',        type=float, required=(dflts.RH is None), default=dflts.RH, help='initial relative humidity [1]')
-prsr_lgr.add_argument('--w',         type=float, required=(dflts.w  is None), default=dflts.w,  help='vertical velocity [m/s]')
-
-prsr_lgr.add_argument('--dt',        type=float, required=(dflts.dt is None), default=dflts.dt, help='timestep [s]')
-prsr_lgr.add_argument('--nt',        type=int,   required=(dflts.nt is None), default=dflts.nt, help='number of timesteps')
+prsr.add_argument('--dt',        type=float, required=(dflts.dt is None), default=dflts.dt, help='timestep [s]')
+prsr.add_argument('--nt',        type=int,   required=(dflts.nt is None), default=dflts.nt, help='number of timesteps')
 
 ## lgrngn options
+prsr_lgr = sprsr.add_parser('lgrngn')
 prsr_lgr.add_argument('--sd_conc',   type=float, required=(dflts.sd_conc is None), default=dflts.sd_conc, help='number of super droplets')
 prsr_lgr.add_argument('--kappa',     type=float, required=(dflts.kappa   is None), default=dflts.kappa,   help='aerosol hygroscopicity parameter [1]')
 prsr_lgr.add_argument('--n_tot',     type=float, required=(dflts.n_tot   is None), default=dflts.n_tot,   help='aerosol concentration @STP [m-3]')
