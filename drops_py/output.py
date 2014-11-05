@@ -32,6 +32,10 @@ class output_lgr:
     self.out_wet = open(outdir + "/spec_wet.txt", mode='w')
     self.out_cld = open(outdir + "/spec_cld.txt", mode='w')
 
+    # previous-timestep saturation (RH)
+    self.last = {'RH':0, 'cld_mom':{}}
+    self.RH_max = None
+
     # defining cld bin locations from cloud_rng and cloud_nbins (linear!)
     self.bins_cld = np.linspace(cloud_rng[0], cloud_rng[1], cloud_nbins+1, 
                                 endpoint=True)
@@ -107,16 +111,41 @@ class output_lgr:
     shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', outdir + '/quicklook.gpi')
 
 
-  def diag(self, prtcls, rhod, th_d, r_v, itime):
+  def diag(self, prtcls, rhod, th_d, r_v, itime, save = True, stats = None):
+    T  = libcl.common.T(th_d[0], rhod[0])
+    RH = (rhod * r_v) * libcl.common.R_v * T / libcl.common.p_vs(T)
+
+    if self.RH_max is None and RH < self.last['RH']:
+      self.RH_max = self.last['RH']
+      stats['S_max_RH'] = self.last['RH']
+      stats['S_max_M0'] = self.last['cld_mom'][0]
+      stats['S_max_M1'] = self.last['cld_mom'][1]
+      stats['S_max_M2'] = self.last['cld_mom'][2]
+      stats['S_max_M3'] = self.last['cld_mom'][3]
+      stats['S_max_rhod'] = self.last['rhod']
+
+    self.last['RH'] = RH
+    self.last['rhod'] = rhod
+      
+    ## cloud water 
+    prtcls.diag_wet_rng(self.cloud_rng[0], self.cloud_rng[1])
+    for k in self.mom_diag: 
+      prtcls.diag_wet_mom(k)
+      self.last['cld_mom'][k] = np.frombuffer(prtcls.outbuf())[0]
+
+    ## all what's below happens only every outfreq timesteps
+    if not save:
+      return
+
     # index of itime in the array self.time
     it_out = self.out_time.searchsorted(itime)
 
-    def save(out, xx, yy):
-      for x, y in zip(xx, yy):
-        out.write(u"%g\t%g\n" % (x, y))
-      out.write(u"\n\n") # gnuplot treats "\n\n" as dataset separator (plot ... index n)
-
     def bins_save(type):
+      def save(out, xx, yy):
+	for x, y in zip(xx, yy):
+	  out.write(u"%g\t%g\n" % (x, y))
+	out.write(u"\n\n") # gnuplot treats "\n\n" as dataset separator (plot ... index n)
+
       bins = np.empty(getattr(self, 'bins_' + type).size - 1)
       for i in range(bins.size) :
         if (type in ['cld', 'wet']):
@@ -142,11 +171,9 @@ class output_lgr:
     self.rv[it_out] =  r_v
 
     ## cloud water 
-    prtcls.diag_wet_rng(self.cloud_rng[0], self.cloud_rng[1])
     for k in self.mom_diag: 
-      prtcls.diag_wet_mom(k)
-      self.out_snd.write(u"\t%g" % (np.frombuffer(prtcls.outbuf())))
-      getattr(self,'mom_' + str(k))[it_out] = np.frombuffer(prtcls.outbuf())
+      self.out_snd.write(u"\t%g" % (self.last['cld_mom'][k]))
+      getattr(self,'mom_' + str(k))[it_out] = self.last['cld_mom'][k]
 
     ## chem stuff 
     prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
@@ -155,4 +182,3 @@ class output_lgr:
       getattr(self, "conc_" + sp)[it_out] =  np.frombuffer(prtcls.outbuf())
  
     self.out_snd.write(u"\n")
-
