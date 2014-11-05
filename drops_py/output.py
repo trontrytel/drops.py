@@ -124,8 +124,11 @@ class output_lgr:
       stats['S_max_M3'] = self.last['cld_mom'][3]
       stats['S_max_rhod'] = self.last['rhod']
 
-    self.last['RH'] = RH
-    self.last['rhod'] = rhod
+    # itime > 0 condition is used as the limited accuracy of calcuations 
+    # of equilibrium radii (at t=0) may cause the RH to drop slightly in the first timestep
+    if itime > 0:
+      self.last['RH'] = RH
+      self.last['rhod'] = rhod
       
     ## cloud water 
     prtcls.diag_wet_rng(self.cloud_rng[0], self.cloud_rng[1])
