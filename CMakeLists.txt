@@ -33,3 +33,6 @@ install(
   DESTINATION "${PYTHON_SITE_DIR}/drops_py"
   PATTERN "drops_py/*.py"
 )
+
+enable_testing()
+add_subdirectory(tests)

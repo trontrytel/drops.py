@@ -120,10 +120,13 @@ parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, out, rhs, stats=sta
 # outputting a setup.gpi file
 out = open(args.outdir + '/setup.gpi', mode='w')
 for key, val in vars(args).iteritems():
-  if not key in ["outdir","defaults","n_tot","meanr","gstdv"]: #TODO: n_tot, meanr and gstdv are here just temporarily
-    out.write(u"%s = %g\n" % (key, float(val)))
+  if isinstance(val, (int, float)):
+    out.write(u"%s = %e\n" % (key, val))
+  else:
+    out.write(u"#%s = %s\n" % (key, val))  
 
 # outputting a stats.gpi file
 out = open(args.outdir + '/stats.gpi', mode='w')
 for key, val in stats.iteritems():
   out.write(u"%s = %g\n" % (key, float(val)))
+
