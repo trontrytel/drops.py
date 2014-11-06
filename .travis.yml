@@ -16,7 +16,7 @@ install:
     - sudo apt-get install --no-install-recommends -t trusty -y libblitz0-dev libhdf5-serial-dev cmake libboost-python-dev python-numpy libthrust-dev 
 
     # libcloudphxx
-    - cd ../..
+    - cd ..
     - git clone --depth=1 git://github.com/igfuw/libcloudphxx.git
     - cd libcloudphxx
     - mkdir build
