@@ -13,7 +13,7 @@ install:
     - if [[ $CXX == 'clang++' ]]; then sudo apt-get install --no-install-recommends clang; fi
     - if [[ $CXX == 'g++'     ]]; then sudo apt-get install --no-install-recommends g++  ; fi
     - sudo apt-get install --no-install-recommends libhdf5-7
-    - sudo apt-get install --no-install-recommends -t trusty -y libblitz0-dev libhdf5-serial-dev cmake libboost-python-dev python-numpy libthrust-dev 
+    - sudo apt-get install --no-install-recommends -t trusty -y libblitz0-dev libhdf5-serial-dev cmake libboost-python-dev python-numpy libthrust-dev python-h5py
 
     # libcloudphxx
     - cd ..
