@@ -21,7 +21,7 @@ install:
     - cd libcloudphxx
     - mkdir build
     - cd build
-    - cmake -DCMAKE_BUILD_TYPE=Release ../
+    - cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr ..
     - make
     - sudo make install
 
@@ -29,6 +29,6 @@ script:
     - cd ../../drops.py
     - mkdir build
     - cd build
-    - cmake ..
+    - cmake -DCMAKE_INSTALL_PREFIX=/usr ..
     - make test || cat Testing/Temporary/LastTest.log / # "/" intentional! (just to make cat exit with an error code)
     - sudo make install
