@@ -33,7 +33,7 @@ class output_lgr:
     self.out_cld = open(outdir + "/spec_cld.txt", mode='w')
 
     # previous-timestep saturation (RH)
-    self.last = {'RH':0, 'cld_mom':{}}
+    self.last = {'RH':0, 'cld_mom':{}, 'act_mom':{}}
     self.RH_max = None
 
     # defining cld bin locations from cloud_rng and cloud_nbins (linear!)
@@ -129,6 +129,7 @@ class output_lgr:
       print self.last['RH_in'], self.last['RH'], RH_in, RH
       stats['S_max_RH'] = max(RH_in, self.last['RH_in'])
       self.RH_max = stats['S_max_RH']
+      stats['S_max_A0'] = self.last['act_mom'][0]
       stats['S_max_M0'] = self.last['cld_mom'][0]
       stats['S_max_M1'] = self.last['cld_mom'][1]
       stats['S_max_M2'] = self.last['cld_mom'][2]
@@ -144,6 +145,11 @@ class output_lgr:
     for k in self.mom_diag: 
       prtcls.diag_wet_mom(k)
       self.last['cld_mom'][k] = np.frombuffer(prtcls.outbuf())[0]
+
+    ## activated droplets
+    prtcls.diag_rw_ge_rc()
+    prtcls.diag_wet_mom(0)
+    self.last['act_mom'][0] = np.frombuffer(prtcls.outbuf())[0]
 
     ## all what's below happens only every outfreq timesteps
     if not save:

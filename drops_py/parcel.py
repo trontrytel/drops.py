@@ -12,7 +12,7 @@ def parcel(p_d, th_d, r_v, w, nt, outfreq, out, rhs, stats=None):
 
   # saving initial values
   #TODO: this call should be microphysics-independent - but now it relies on presence of prtcls in rhs!
-  out.diag(rhs.prtcls, rhod, th_d, r_v, 0, stats=stats) 
+  out.diag(rhs.prtcls, rhod, th_d, r_v, rhod, th_d, r_v, 0, stats=stats) 
 
   # Euler-like integration
   for it in range(nt):
