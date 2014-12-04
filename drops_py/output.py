@@ -110,14 +110,25 @@ class output_lgr:
     import shutil
     shutil.copyfile(os.path.dirname(__file__) + '/quicklook.gpi', outdir + '/quicklook.gpi')
 
+  def diag(self, prtcls, 
+    # values before adjustment by microphysics
+    rhod_in, th_d_in, r_v_in, 
+    # values after adjustment by microphysics
+    rhod, th_d, r_v, 
+    itime, 
+    save = True, stats = None
+  ):
+    def S(rhod, th_d, r_v):
+      T  = libcl.common.T(th_d[0], rhod[0])
+      return (rhod * r_v) * libcl.common.R_v * T / libcl.common.p_vs(T)
 
-  def diag(self, prtcls, rhod, th_d, r_v, itime, save = True, stats = None):
-    T  = libcl.common.T(th_d[0], rhod[0])
-    RH = (rhod * r_v) * libcl.common.R_v * T / libcl.common.p_vs(T)
+    RH_in = S(rhod_in, th_d_in, r_v_in)
+    RH = S(rhod, th_d, r_v)
 
     if self.RH_max is None and RH < self.last['RH']:
-      self.RH_max = self.last['RH']
-      stats['S_max_RH'] = self.last['RH']
+      print self.last['RH_in'], self.last['RH'], RH_in, RH
+      stats['S_max_RH'] = max(RH_in, self.last['RH_in'])
+      self.RH_max = stats['S_max_RH']
       stats['S_max_M0'] = self.last['cld_mom'][0]
       stats['S_max_M1'] = self.last['cld_mom'][1]
       stats['S_max_M2'] = self.last['cld_mom'][2]
@@ -125,6 +136,7 @@ class output_lgr:
       stats['S_max_rhod'] = self.last['rhod']
 
     self.last['RH'] = RH
+    self.last['RH_in'] = RH_in
     self.last['rhod'] = rhod
       
     ## cloud water 
