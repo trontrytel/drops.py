@@ -126,7 +126,7 @@ class output_lgr:
     RH = S(rhod, th_d, r_v)
 
     if self.RH_max is None and RH < self.last['RH']:
-      print self.last['RH_in'], self.last['RH'], RH_in, RH
+      #print self.last['RH_in'], self.last['RH'], RH_in, RH
       stats['S_max_RH'] = max(RH_in, self.last['RH_in'])
       self.RH_max = stats['S_max_RH']
       stats['S_max_A0'] = self.last['act_mom'][0]
