@@ -9,7 +9,7 @@ os.system(srcdir + "/drops.py --outdir " + outdir +
   " --T 288 --p 100000 --RH 0.999 --w 0.62593 --outfreq 10000" + 
   " --dt 0.5 --nt 320 lgrngn --sd_conc 128 --kappa 0.6052" + 
   " --n_tot 930759410 317786280 --meanr 1.1429e-07 4.3822e-08" + 
-  " --gstdv 1.4745 1.4466"
+  " --gstdv 1.4745 1.4466 --cloud_r_min 2e-6"
 )
 
 f = open(outdir + "/stats.gpi")
