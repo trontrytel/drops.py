@@ -19,7 +19,7 @@ class rhs_lgrngn:
     self.opts.coal = False
 
     # disabling substepping
-    self.sstp_cond = 1
+    self.opts_init.sstp_cond = 1
 
     if chem_gas != None:
       self.opts.chem = True
