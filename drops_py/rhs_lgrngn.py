@@ -11,6 +11,7 @@ class rhs_lgrngn:
     self.opts_init.dry_distros = dry_distros
     self.opts_init.dt = dt
     self.dt = dt # as it is used from parcel.py :(
+    self.opts_init.kernel = geometric #TODO: as an option
 
     self.opts = libcl.lgrngn.opts_t()
 
