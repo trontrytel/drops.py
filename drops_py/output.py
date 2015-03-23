@@ -90,8 +90,6 @@ class output_lgr:
       units_sound["conc_" + str(sp)] = "TODO" 
 
     for var in variables_sound:
-      #print "var sound", var
-      #pdb.set_trace()
       setattr(self, var, self.hdf_sound.create_dataset(var, (out_time.size,), dtype='f')) 
       getattr(self, var).dims.create_scale(self.hdf_sound["time"], "time")
       getattr(self, var).dims[0].attach_scale(self.hdf_sound["time"])
@@ -126,7 +124,6 @@ class output_lgr:
     RH = S(rhod, th_d, r_v)
 
     if self.RH_max is None and RH < self.last['RH']:
-      print self.last['RH_in'], self.last['RH'], RH_in, RH
       stats['S_max_RH'] = max(RH_in, self.last['RH_in'])
       self.RH_max = stats['S_max_RH']
       stats['S_max_A0'] = self.last['act_mom'][0]
