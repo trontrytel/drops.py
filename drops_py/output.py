@@ -5,7 +5,7 @@ import libcloudphxx as libcl
 
 class output_lgr:
 
-  def __init__(self, outdir, out_time, mom_diag=range(4), chem_sp = ["S_VI", "H", "SO2"],
+  def __init__(self, outdir, out_time, mom_diag=range(4), #chem_sp = ["S_VI", "H", "SO2"],
                cloud_rng = (.5e-6, 25e-6),
                cloud_nbins = 49,
                bins_dry = 1e-6 * pow(10, -3 + np.arange(40) * .1),
@@ -21,7 +21,7 @@ class output_lgr:
       pass
     self.out_time = out_time
     self.mom_diag = mom_diag 
-    self.chem_sp = chem_sp
+#    self.chem_sp = chem_sp
     self.cloud_rng = cloud_rng
     self.bins_dry = bins_dry
     self.bins_wet = bins_wet
@@ -85,9 +85,9 @@ class output_lgr:
     for i in self.mom_diag:
       variables_sound.append("mom_" + str(i))
       units_sound["mom_" + str(i)] = "m^" + str(i) #TODO is it ok??
-    for sp in self.chem_sp:
-      variables_sound.append("conc_" + str(sp)) #TODO is it indeed concentration?
-      units_sound["conc_" + str(sp)] = "TODO" 
+#    for sp in self.chem_sp:
+#      variables_sound.append("conc_" + str(sp)) #TODO is it indeed concentration?
+#      units_sound["conc_" + str(sp)] = "TODO" 
 
     for var in variables_sound:
       #print "var sound", var
@@ -194,9 +194,9 @@ class output_lgr:
       getattr(self,'mom_' + str(k))[it_out] = self.last['cld_mom'][k]
 
     ## chem stuff 
-    prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
-    for sp in self.chem_sp:
-      prtcls.diag_chem(getattr(libcl.lgrngn.chem_species_t, sp)) 
-      getattr(self, "conc_" + sp)[it_out] =  np.frombuffer(prtcls.outbuf())
+#    prtcls.diag_wet_rng(0,1) # 0 ... 1 m #TODO: consider a select-all option?
+#    for sp in self.chem_sp:
+#      prtcls.diag_chem(getattr(libcl.lgrngn.chem_species_t, sp)) 
+#      getattr(self, "conc_" + sp)[it_out] =  np.frombuffer(prtcls.outbuf())
  
     self.out_snd.write(u"\n")

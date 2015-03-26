@@ -24,6 +24,7 @@ class rhs_lgrngn:
 
     if chem_gas != None:
       self.opts.chem = True
+      self.opts_init.chem_switch = True
       self.opts.chem_gas = chem_gas
 
 
