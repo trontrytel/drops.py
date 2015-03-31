@@ -98,7 +98,8 @@ out = output.output_lgr(
   args.outdir, 
   args.dt * np.arange(0, args.nt+1, args.outfreq), # nt+1 to include nt in the time_out, 
   cloud_rng = (args.cloud_r_min, args.cloud_r_max),
-  cloud_nbins = args.cloud_n_bin
+  cloud_nbins = args.cloud_n_bin,
+  chem_sp = []
 ) 
 stats = {}
 parcel.parcel(p_d, th_d, r_v, args.w, args.nt, args.outfreq, out, rhs, stats=stats)
