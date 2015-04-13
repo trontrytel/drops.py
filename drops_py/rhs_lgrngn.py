@@ -11,12 +11,12 @@ class rhs_lgrngn:
     self.opts_init.dry_distros = dry_distros
     self.opts_init.dt = dt
     self.dt = dt # as it is used from parcel.py :(
-    self.opts_init.kernel = libcl.lgrngn.kernel_t.geometric #TODO: as an option
-    self.opts_init.terminal_velocity = libcl.lgrngn.vt_t.beard #TODO: as an option
 
     self.opts = libcl.lgrngn.opts_t()
 
     # turning off sedimentation and coalescence
+    self.opts_init.sedi_switch = False
+    self.opts_init.coal_switch = False
     self.opts.sedi = False
     self.opts.coal = False
 
