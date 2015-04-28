@@ -15,8 +15,13 @@ class rhs_lgrngn:
     self.opts = libcl.lgrngn.opts_t()
 
     # turning off sedimentation and coalescence
-    self.opts_init.sedi_switch = False
-    self.opts_init.coal_switch = False
+
+    # TODO - after it gets accepted in libcloud
+    #self.opts_init.sedi_switch = False
+    #self.opts_init.coal_switch = False
+
+    self.opts_init.kernel = libcl.lgrngn.kernel_t.geometric
+
     self.opts.sedi = False
     self.opts.coal = False
 

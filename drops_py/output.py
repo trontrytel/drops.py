@@ -180,9 +180,9 @@ class output_lgr:
       bins_save(type)
     
     # outputting sounding.txt and sounding.hdf
-    self.out_snd.write(u"%g" % (rhod))
+    self.out_snd.write(u"%.9g" % (rhod))
     self.out_snd.write(u"\t%.9g" % (th_d))
-    self.out_snd.write(u"\t%g" % (r_v))
+    self.out_snd.write(u"\t%.9g" % (r_v))
     # outputting to hdf 
     self.rhod[it_out] = rhod
     self.thd[it_out] = th_d
@@ -190,7 +190,7 @@ class output_lgr:
 
     ## cloud water 
     for k in self.mom_diag: 
-      self.out_snd.write(u"\t%g" % (self.last['cld_mom'][k]))
+      self.out_snd.write(u"\t%.9g" % (self.last['cld_mom'][k]))
       getattr(self,'mom_' + str(k))[it_out] = self.last['cld_mom'][k]
 
     ## chem stuff 
