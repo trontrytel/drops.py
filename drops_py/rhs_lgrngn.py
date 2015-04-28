@@ -11,6 +11,7 @@ class rhs_lgrngn:
     self.opts_init.dry_distros = dry_distros
     self.opts_init.dt = dt
     self.dt = dt # as it is used from parcel.py :(
+    self.opts_init.kernel = libcl.lgrngn.kernel_t.geometric #TODO: as an option
 
     self.opts = libcl.lgrngn.opts_t()
 
@@ -19,7 +20,7 @@ class rhs_lgrngn:
     self.opts.coal = False
 
     # disabling substepping
-    self.opts.sstp_cond = 1
+    self.opts_init.sstp_cond = 1
 
     if chem_gas != None:
       self.opts.chem = True

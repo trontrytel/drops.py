@@ -2,7 +2,7 @@
 
 # note: before "make install" it uses local one (that's why the directory is named drops_py),
 #       afterwards - the system one is used (the one installed by "make install"
-from drops_py import rhs_lgrngn, parcel, output
+from drops_py import rhs_lgrngn, parcel, output, distros
 from drops_py.defaults import defaults
 from drops_py.defaults_Ghan_et_al_1998 import defaults_Ghan_et_al_1998
 from drops_py.defaults_Kreidenweis_et_al_2003 import defaults_Kreidenweis_et_al_2003
@@ -11,7 +11,7 @@ from argparse import ArgumentParser
 import libcloudphxx.common as libcom 
 import libcloudphxx as libcl
 import numpy as np
-import math 
+ 
 
 # just a few constants not repeat them below
 desc = 'drops.py - a parcel model based on libcloudph++'
@@ -76,20 +76,6 @@ p_d = args.p - p_v
 r_v = libcom.eps * p_v / p_d
 th_d = args.T * pow(libcom.p_1000 / p_d, libcom.R_d / libcom.c_pd)
 
-class lognormal:
-  def __init__(self, n_tot, meanr, gstdv):
-    assert len(n_tot) == len(meanr) == len(gstdv)
-    self.meanr = meanr
-    self.stdev = gstdv
-    self.n_tot = n_tot
- 
-  def __call__(self, lnr):
-    total = 0.
-    for m in range(0, len(self.n_tot)):
-      total += self.n_tot[m] * math.exp(
-	-pow((lnr - math.log(self.meanr[m])), 2) / 2 / pow(math.log(self.stdev[m]),2)
-      ) / math.log(self.stdev[m]) / math.sqrt(2*math.pi);
-    return total
 
 chem_gas = None
 if args.chem_SO2 + args.chem_O3 + args.chem_H2O2 > 0:
@@ -104,7 +90,7 @@ rhs = rhs_lgrngn.rhs_lgrngn(
   args.dt, 
   args.sd_conc, 
   { 
-    args.kappa : lognormal(args.n_tot, args.meanr, args.gstdv)
+    args.kappa : distros.lognormal(args.n_tot, args.meanr, args.gstdv)
   },
   chem_gas = chem_gas
 )
