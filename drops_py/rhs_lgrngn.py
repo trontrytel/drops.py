@@ -25,6 +25,9 @@ class rhs_lgrngn:
     self.opts.sedi = False
     self.opts.coal = False
 
+    self.opts_init.coal_switch = False
+    self.opts_init.sedi_switch = False
+
     # disabling substepping
     self.opts_init.sstp_cond = 1
 
